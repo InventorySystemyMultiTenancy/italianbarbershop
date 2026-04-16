@@ -22,52 +22,28 @@ function isBirthdayToday(dateText?: string) {
 
 const Index = () => {
   const { user, birthdayDiscount, refreshSession } = useAuth();
-  const { language } = useLanguage();
-  const text = language === "ma"
-    ? {
-        birthdayTitle: "Mabrouk! Tkhfida dyal 3id lmilad khdama",
-        birthdayFallback: "3endek 50% f l9assa lyoum.",
-        birthdayPercentSuffix: "f l9assa lyoum",
-        premiumBarber: "7ella9 premium",
-        heroTitleA: "STYLE LI",
-        heroTitleB: "KAY3ARFK",
-        heroSubtitle: "Tajriba premium f l9assa dyal rjal. Hjz online w dmen lwa9t dyalek.",
-        bookNow: "HJZ DABA",
-        servicesA: "KHADAMATNA",
-        servicesB: "LKAMLIN",
-        ctaA: "WAJED L",
-        ctaB: "L9ASSA DYALK",
-        ctaSubtitle: "Sajjel w hjz lwa9t dyalek f chi tawani.",
-        startNow: "BDA DABA",
-        footer: "© 2026 Nome da sua barbearia. Ga3 l7oukou9 ma7foda.",
-        services: [
-          { title: "L9assa dyal rjal", desc: "L9assa 3la 7sab style dyalek b tari9a 3asriya", price: "R$ 50" },
-          { title: "3inaya b l7ya", desc: "3inaya m3a finition m7tarfa", price: "R$ 40" },
-          { title: "L9assa & L7ya", desc: "Pack kamel l9assa m3a l7ya", price: "R$ 85" },
-        ],
-      }
-    : {
-        birthdayTitle: "Auguri! Sconto compleanno attivo",
-        birthdayFallback: "Hai il 50% sul taglio oggi.",
-        birthdayPercentSuffix: "sul taglio oggi",
-        premiumBarber: "Barberia Premium",
-        heroTitleA: "STILE CHE",
-        heroTitleB: "TI DEFINISCE",
-        heroSubtitle: "Esperienza premium nel taglio maschile. Prenota online e blocca il tuo orario.",
-        bookNow: "PRENOTA ORA",
-        servicesA: "I NOSTRI",
-        servicesB: "SERVIZI",
-        ctaA: "PRONTO PER IL",
-        ctaB: "TUO TAGLIO",
-        ctaSubtitle: "Registrati e prenota il tuo orario in pochi secondi.",
-        startNow: "INIZIA ORA",
-        footer: "© 2026 Nome da sua barbearia. Tutti i diritti riservati.",
-        services: [
-          { title: "Taglio Uomo", desc: "Taglio personalizzato con tecniche moderne", price: "R$ 50" },
-          { title: "Barboterapia", desc: "Cura e finitura professionale della barba", price: "R$ 40" },
-          { title: "Taglio & Barba", desc: "Combo completo taglio + barba", price: "R$ 85" },
-        ],
-      };
+  const { t } = useLanguage();
+
+  const services = [
+    {
+      icon: Scissors,
+      title: t("home_service_cut_title", "Corte Masculino"),
+      desc: t("home_service_cut_desc", "Corte personalizado com tecnicas modernas"),
+      price: "R$ 50",
+    },
+    {
+      icon: Clock,
+      title: t("home_service_beard_title", "Barboterapia"),
+      desc: t("home_service_beard_desc", "Cuidado e acabamento profissional para a barba"),
+      price: "R$ 40",
+    },
+    {
+      icon: CalendarDays,
+      title: t("home_service_combo_title", "Corte & Barba"),
+      desc: t("home_service_combo_desc", "Combo completo de corte com barba"),
+      price: "R$ 85",
+    },
+  ];
   const hasBirthdayPromo = Boolean(
     birthdayDiscount.active || ((birthdayDiscount.discountPercent ?? 0) > 0 && isBirthdayToday(user?.birthDate)),
   );
@@ -95,39 +71,41 @@ const Index = () => {
             <div className="mb-4 glass rounded-lg border border-primary/40 bg-primary/10 p-4 text-left sm:text-center">
               <div className="inline-flex items-center gap-2 text-primary font-semibold">
                 <Gift className="h-4 w-4" />
-                {text.birthdayTitle}
+                {t("home_birthday_title", "Parabens! Desconto de aniversario ativo")}
               </div>
-              <p className="text-sm text-foreground mt-2">{birthdayDiscount.message || text.birthdayFallback}</p>
+              <p className="text-sm text-foreground mt-2">{birthdayDiscount.message || t("home_birthday_fallback", "Voce tem 50% no corte hoje.")}</p>
               <p className="text-sm font-semibold text-primary mt-1">
-                {birthdayDiscount.discountPercent ? `${birthdayDiscount.discountPercent}% ${text.birthdayPercentSuffix}` : `50% ${text.birthdayPercentSuffix}`}
+                {birthdayDiscount.discountPercent
+                  ? `${birthdayDiscount.discountPercent}% ${t("home_birthday_suffix", "no corte hoje")}`
+                  : `50% ${t("home_birthday_suffix", "no corte hoje")}`}
               </p>
             </div>
           )}
 
           <img
             src={logoImage}
-            alt="Logo Nome da sua barbearia"
+            alt={t("brand_logo_alt", "Logo da sua barbearia")}
             className="h-20 w-20 md:h-24 md:w-24 object-contain mx-auto mb-2"
           />
 
           <div className="inline-flex items-center gap-2 mb-6 px-4 py-2 rounded-full border border-primary/30 bg-primary/10">
             <Scissors className="h-4 w-4 text-primary" />
-            <span className="text-sm text-primary font-medium">{text.premiumBarber}</span>
+            <span className="text-sm text-primary font-medium">{t("home_badge_premium", "Barbearia Premium")}</span>
           </div>
           
           <h1 className="font-heading text-5xl md:text-7xl font-bold mb-6 leading-tight">
-            {text.heroTitleA}<br />
-            <span className="gold-text">{text.heroTitleB}</span>
+            {t("home_hero_title_a", "ESTILO QUE")}<br />
+            <span className="gold-text">{t("home_hero_title_b", "DEFINE VOCE")}</span>
           </h1>
           
           <p className="text-lg text-muted-foreground mb-10 max-w-xl mx-auto">
-            {text.heroSubtitle}
+            {t("home_hero_subtitle", "Experiencia premium em corte masculino. Agende online e garanta seu horario.")}
           </p>
 
           <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
             <Link to={user ? "/agendar" : "/cadastro"}>
               <Button size="lg" className="text-lg px-8 py-6 font-heading">
-                {text.bookNow}
+                {t("home_book_now", "AGENDAR AGORA")}
               </Button>
             </Link>
           </div>
@@ -138,15 +116,11 @@ const Index = () => {
       <section className="py-24 px-4">
         <div className="container mx-auto max-w-5xl">
           <h2 className="font-heading text-3xl md:text-4xl font-bold text-center mb-16">
-            {text.servicesA} <span className="gold-text">{text.servicesB}</span>
+            {t("home_services_title_a", "NOSSOS")} <span className="gold-text">{t("home_services_title_b", "SERVICOS")}</span>
           </h2>
 
           <div className="grid md:grid-cols-3 gap-6">
-            {[
-              { icon: Scissors, ...text.services[0] },
-              { icon: Clock, ...text.services[1] },
-              { icon: CalendarDays, ...text.services[2] },
-            ].map((service, i) => (
+            {services.map((service, i) => (
               <div
                 key={service.title}
                 className="glass rounded-lg p-8 text-center hover:border-primary/30 transition-all duration-300 group"
@@ -166,14 +140,14 @@ const Index = () => {
       <section className="py-20 px-4 border-t border-border">
         <div className="container mx-auto text-center max-w-2xl">
           <h2 className="font-heading text-3xl font-bold mb-4">
-            {text.ctaA} <span className="gold-text">{text.ctaB}</span>?
+            {t("home_cta_title_a", "PRONTO PARA O")} <span className="gold-text">{t("home_cta_title_b", "SEU CORTE")}</span>?
           </h2>
           <p className="text-muted-foreground mb-8">
-            {text.ctaSubtitle}
+            {t("home_cta_subtitle", "Cadastre-se e agende seu horario em segundos.")}
           </p>
           <Link to={user ? "/agendar" : "/cadastro"}>
             <Button size="lg" className="font-heading text-lg px-8">
-              {user ? text.bookNow : text.startNow}
+              {user ? t("home_book_now", "AGENDAR AGORA") : t("home_start_now", "COMECAR AGORA")}
             </Button>
           </Link>
         </div>
@@ -182,7 +156,7 @@ const Index = () => {
       {/* Footer */}
       <footer className="border-t border-border py-8 px-4">
         <div className="container mx-auto text-center text-sm text-muted-foreground">
-          <p>{text.footer}</p>
+          <p>{t("home_footer", "© 2026 Nome da sua barbearia. Todos os direitos reservados.")}</p>
         </div>
       </footer>
     </div>

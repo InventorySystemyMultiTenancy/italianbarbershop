@@ -1,13 +1,16 @@
 import { createContext, useContext, useEffect, useMemo, useState } from "react";
 import type { ReactNode } from "react";
 import type { Locale } from "date-fns";
-import { arSA, it as itLocale } from "date-fns/locale";
+import { arSA, it as itLocale, ptBR } from "date-fns/locale";
 import {
   createAdminSiteLanguage,
   getSiteLanguages,
   type CreateSiteLanguagePayload,
   type SiteLanguage,
 } from "@/lib/api";
+import { useI18n } from "@/hooks/useI18n";
+import { UI_TRANSLATION_ENTRIES_PT } from "@/lib/i18nEntries";
+import type { Translations } from "@/lib/i18n";
 
 export type AppLanguage = string;
 
@@ -36,12 +39,16 @@ interface LanguageContextType {
   addingLanguage: boolean;
   dateFnsLocale: Locale;
   currencyLocale: string;
+  translations: Translations;
+  i18nLoading: boolean;
+  i18nError: string | null;
+  t: (key: string, fallback: string) => string;
 }
 
-const LANGUAGE_STORAGE_KEY = "app-language";
 const LANGUAGE_LIST_STORAGE_KEY = "app-language-list";
 
 const DEFAULT_LANGUAGES: AvailableLanguage[] = [
+  { code: "pt", name: "Portugues", countryCode: "BR", flag: "🇧🇷", enabled: true },
   { code: "it", name: "Italiano", countryCode: "IT", flag: "🇮🇹", enabled: true },
   { code: "ma", name: "Moroccan", countryCode: "MA", flag: "🇲🇦", enabled: true },
 ];
@@ -105,16 +112,21 @@ function readStoredLanguages() {
   }
 }
 
-function getInitialLanguage(languages: AvailableLanguage[]): AppLanguage {
-  const stored = localStorage.getItem(LANGUAGE_STORAGE_KEY);
-  if (stored && languages.some((language) => language.code === stored)) return stored;
-  return "it";
-}
-
 export function LanguageProvider({ children }: { children: ReactNode }) {
   const [availableLanguages, setAvailableLanguages] = useState<AvailableLanguage[]>(() => readStoredLanguages());
-  const [language, setLanguage] = useState<AppLanguage>(() => getInitialLanguage(readStoredLanguages()));
   const [addingLanguage, setAddingLanguage] = useState(false);
+
+  const {
+    currentLanguage,
+    setLanguage,
+    translations,
+    loading: i18nLoading,
+    error: i18nError,
+    t,
+  } = useI18n({
+    entries: UI_TRANSLATION_ENTRIES_PT,
+    defaultLanguage: "pt",
+  });
 
   const reloadLanguages = async () => {
     try {
@@ -158,46 +170,65 @@ export function LanguageProvider({ children }: { children: ReactNode }) {
   };
 
   const selectedLanguage = useMemo(() => {
-    return availableLanguages.find((item) => item.code === language) || DEFAULT_LANGUAGES[0];
-  }, [availableLanguages, language]);
-
-  useEffect(() => {
-    localStorage.setItem(LANGUAGE_STORAGE_KEY, language);
-  }, [language]);
+    return availableLanguages.find((item) => item.code === currentLanguage) || DEFAULT_LANGUAGES[0];
+  }, [availableLanguages, currentLanguage]);
 
   useEffect(() => {
     localStorage.setItem(LANGUAGE_LIST_STORAGE_KEY, JSON.stringify(availableLanguages));
   }, [availableLanguages]);
 
   useEffect(() => {
-    if (!availableLanguages.some((item) => item.code === language)) {
-      setLanguage("it");
+    if (!availableLanguages.some((item) => item.code === currentLanguage)) {
+      setLanguage("pt");
     }
-  }, [availableLanguages, language]);
+  }, [availableLanguages, currentLanguage, setLanguage]);
 
   useEffect(() => {
     void reloadLanguages();
   }, []);
 
   const value = useMemo<LanguageContextType>(() => {
-    const isMoroccan = language === "ma";
+    const safeLanguage = currentLanguage.toLowerCase();
+    const dateFnsLocale =
+      safeLanguage === "ma"
+        ? arSA
+        : safeLanguage === "it"
+          ? itLocale
+          : ptBR;
 
-    const inferredLocale = selectedLanguage.countryCode
-      ? `${selectedLanguage.code}-${selectedLanguage.countryCode}`
-      : "it-IT";
+    const currencyLocale =
+      safeLanguage === "ma"
+        ? "ar-MA"
+        : safeLanguage === "it"
+          ? "it-IT"
+          : "pt-BR";
 
     return {
-      language,
+      language: currentLanguage,
       setLanguage,
       availableLanguages,
       selectedLanguage,
       addLanguage,
       reloadLanguages,
       addingLanguage,
-      dateFnsLocale: isMoroccan ? arSA : itLocale,
-      currencyLocale: isMoroccan ? "ar-MA" : inferredLocale,
+      dateFnsLocale,
+      currencyLocale,
+      translations,
+      i18nLoading,
+      i18nError,
+      t,
     };
-  }, [language, availableLanguages, selectedLanguage, addingLanguage]);
+  }, [
+    currentLanguage,
+    setLanguage,
+    availableLanguages,
+    selectedLanguage,
+    addingLanguage,
+    translations,
+    i18nLoading,
+    i18nError,
+    t,
+  ]);
 
   return <LanguageContext.Provider value={value}>{children}</LanguageContext.Provider>;
 }

@@ -13,31 +13,8 @@ const Login = () => {
   const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
   const { signIn } = useAuth();
-  const { language } = useLanguage();
+  const { t } = useLanguage();
   const navigate = useNavigate();
-  const text = language === "ma"
-    ? {
-        errorTitle: "Khata2 f dkhol",
-        welcomeBack: "Marhba b3awda!",
-        subtitle: "Dkhol l 7ساب dyalek",
-        phone: "Téléphone",
-        password: "Mot de passe",
-        loginLoading: "Kandkhol...",
-        login: "Dkhol",
-        noAccount: "Ma3endekch compte?",
-        register: "Sajjel",
-      }
-    : {
-        errorTitle: "Errore di accesso",
-        welcomeBack: "Bentornato!",
-        subtitle: "Accedi al tuo account",
-        phone: "Telefono",
-        password: "Password",
-        loginLoading: "Accesso in corso...",
-        login: "Accedi",
-        noAccount: "Non hai un account?",
-        register: "Registrati",
-      };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -45,9 +22,9 @@ const Login = () => {
     const { error } = await signIn(phone, password);
     setLoading(false);
     if (error) {
-      toast({ title: text.errorTitle, description: error.message, variant: "destructive" });
+      toast({ title: t("login_error_title", "Erro ao entrar"), description: error.message, variant: "destructive" });
     } else {
-      toast({ title: text.welcomeBack });
+      toast({ title: t("login_welcome_back", "Bem-vindo de volta!") });
       navigate("/agendar");
     }
   };
@@ -58,14 +35,14 @@ const Login = () => {
         <div className="text-center">
           <Link to="/" className="inline-flex items-center gap-2">
             <Scissors className="h-8 w-8 text-primary" />
-            <span className="font-heading text-3xl font-bold gold-text">Nome da sua barbearia</span>
+            <span className="font-heading text-3xl font-bold gold-text">{t("brand_name", "Nome da sua barbearia")}</span>
           </Link>
-          <p className="mt-3 text-muted-foreground">{text.subtitle}</p>
+          <p className="mt-3 text-muted-foreground">{t("login_title", "Entrar na sua conta")}</p>
         </div>
 
         <form onSubmit={handleSubmit} className="space-y-5 glass p-8 rounded-lg">
           <div className="space-y-2">
-            <Label htmlFor="phone">{text.phone}</Label>
+            <Label htmlFor="phone">{t("login_phone", "Telefone")}</Label>
             <Input
               id="phone"
               type="tel"
@@ -77,7 +54,7 @@ const Login = () => {
             />
           </div>
           <div className="space-y-2">
-            <Label htmlFor="password">{text.password}</Label>
+            <Label htmlFor="password">{t("login_password", "Senha")}</Label>
             <Input
               id="password"
               type="password"
@@ -89,12 +66,12 @@ const Login = () => {
             />
           </div>
           <Button type="submit" className="w-full" disabled={loading}>
-            {loading ? text.loginLoading : text.login}
+            {loading ? t("login_loading", "Entrando...") : t("login_button", "Entrar")}
           </Button>
           <p className="text-center text-sm text-muted-foreground">
-            {text.noAccount}{" "}
+            {t("login_no_account", "Nao tem conta?")}{" "}
             <Link to="/cadastro" className="text-primary hover:underline">
-              {text.register}
+              {t("login_register", "Cadastre-se")}
             </Link>
           </p>
         </form>
