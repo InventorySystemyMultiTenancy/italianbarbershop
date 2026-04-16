@@ -569,7 +569,10 @@ const Booking = () => {
       if (error instanceof ApiClientError && error.status === 401) {
         toast({
           title: t("booking_expired_title", "Sessione scaduta"),
-          description: t("booking_expired_desc", "Accedi di nuovo per continuare."),
+          description: t(
+            "booking_expired_desc",
+            "Accedi di nuovo per continuare.",
+          ),
           variant: "destructive",
         });
         navigate("/login");
@@ -662,9 +665,12 @@ const Booking = () => {
       <Header />
       <div className="container mx-auto max-w-2xl px-4 pt-24 pb-16">
         <h1 className="font-heading text-3xl font-bold mb-2">
-          {t("booking_title_a", "PRENOTA")} <span className="gold-text">{t("booking_title_b", "ORARIO")}</span>
+          {t("booking_title_a", "PRENOTA")}{" "}
+          <span className="gold-text">{t("booking_title_b", "ORARIO")}</span>
         </h1>
-        <p className="text-muted-foreground mb-8">{t("booking_subtitle", "Scegli giorno e orario del tuo taglio")}</p>
+        <p className="text-muted-foreground mb-8">
+          {t("booking_subtitle", "Scegli giorno e orario del tuo taglio")}
+        </p>
         <p className="text-sm text-muted-foreground mb-8">
           {t("booking_window_prefix", "Prenotazioni disponibili da")}{" "}
           {format(parseLocalDate(bookingWindowStart), "dd/MM")}{" "}
@@ -675,10 +681,15 @@ const Booking = () => {
         {hasBirthdayPromoGlobally && (
           <div className="mb-6 glass rounded-lg border border-primary/40 bg-primary/10 p-4">
             <div className="inline-flex items-center gap-2 text-primary font-semibold">
-              <Gift className="h-4 w-4" /> {t("booking_birthday_promo_active", "Promo compleanno attiva")}
+              <Gift className="h-4 w-4" />{" "}
+              {t("booking_birthday_promo_active", "Promo compleanno attiva")}
             </div>
             <p className="text-sm text-foreground mt-1">
-              {birthdayDiscount.message || t("booking_birthday_promo_fallback", "Hai uno sconto compleanno sul servizio idoneo.")}
+              {birthdayDiscount.message ||
+                t(
+                  "booking_birthday_promo_fallback",
+                  "Hai uno sconto compleanno sul servizio idoneo.",
+                )}
             </p>
             <p className="text-xs text-muted-foreground mt-1">
               {t("booking_discount_label", "Sconto")}:{" "}
@@ -701,10 +712,15 @@ const Booking = () => {
           </div>
 
           {servicesLoading ? (
-            <p className="text-muted-foreground">{t("booking_loading_services", "Caricamento servizi...")}</p>
+            <p className="text-muted-foreground">
+              {t("booking_loading_services", "Caricamento servizi...")}
+            </p>
           ) : services.length === 0 ? (
             <div className="glass rounded-lg p-5 text-center text-muted-foreground">
-              {t("booking_no_services", "Nessun servizio disponibile nel catalogo.")}
+              {t(
+                "booking_no_services",
+                "Nessun servizio disponibile nel catalogo.",
+              )}
             </div>
           ) : (
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
@@ -728,7 +744,7 @@ const Booking = () => {
                     }`}
                   >
                     <p className="font-heading font-semibold">
-                      {service.label}
+                      {t(`service_${service.key}`, service.label)}
                     </p>
                     {serviceHasBirthdayPromo ? (
                       <div className="mt-1">
@@ -737,7 +753,8 @@ const Booking = () => {
                         </p>
                         <p className="text-sm text-primary font-semibold">
                           {formatMoney(discountedPrice, currencyLocale)} (
-                          {birthdayPercent}% {t("booking_birthday_off_suffix", "OFF compleanno")})
+                          {birthdayPercent}%{" "}
+                          {t("booking_birthday_off_suffix", "OFF compleanno")})
                         </p>
                       </div>
                     ) : (
@@ -761,7 +778,9 @@ const Booking = () => {
           </div>
 
           {barbersLoading ? (
-            <p className="text-muted-foreground">{t("booking_loading_barbers", "Caricamento barbieri...")}</p>
+            <p className="text-muted-foreground">
+              {t("booking_loading_barbers", "Caricamento barbieri...")}
+            </p>
           ) : barbersError ? (
             <div className="glass rounded-lg p-5 text-center text-muted-foreground space-y-3">
               <p>{barbersError}</p>
@@ -871,7 +890,9 @@ const Booking = () => {
               {t("booking_select_barber", "Seleziona un barbiere.")}
             </div>
           ) : slotsLoading ? (
-            <p className="text-muted-foreground">{t("booking_loading_slots", "Caricamento orari...")}</p>
+            <p className="text-muted-foreground">
+              {t("booking_loading_slots", "Caricamento orari...")}
+            </p>
           ) : slotsError ? (
             <div className="glass rounded-lg p-5 text-center text-muted-foreground space-y-3">
               <p>{slotsError}</p>
@@ -881,7 +902,10 @@ const Booking = () => {
             </div>
           ) : slots.length === 0 ? (
             <div className="glass rounded-lg p-5 text-center text-muted-foreground">
-              {t("booking_no_slots", "Nessun orario disponibile per questa data.")}
+              {t(
+                "booking_no_slots",
+                "Nessun orario disponibile per questa data.",
+              )}
             </div>
           ) : (
             <div className="grid grid-cols-3 sm:grid-cols-4 gap-3">
@@ -943,12 +967,18 @@ const Booking = () => {
                 </p>
                 {selectedBarber && (
                   <p className="text-xs text-muted-foreground">
-                    {t("booking_barber_label", "Barbiere")}: {selectedBarber.fullName}
+                    {t("booking_barber_label", "Barbiere")}:{" "}
+                    {selectedBarber.fullName}
                   </p>
                 )}
                 {selectedService && (
                   <div className="text-sm text-muted-foreground">
-                    <p>{selectedService.label}</p>
+                    <p>
+                      {t(
+                        `service_${selectedService.key}`,
+                        selectedService.label,
+                      )}
+                    </p>
                     {hasBirthdayDiscountForSelectedService ? (
                       <p>
                         <span className="line-through opacity-80 mr-2">
@@ -981,7 +1011,10 @@ const Booking = () => {
                 {lastDiscountSummary?.applied && (
                   <div className="mt-2 rounded-md border border-primary/40 bg-primary/10 p-2">
                     <p className="text-sm font-semibold text-primary">
-                      {t("booking_birthday_applied", "Sconto compleanno applicato")}
+                      {t(
+                        "booking_birthday_applied",
+                        "Sconto compleanno applicato",
+                      )}
                     </p>
                     {lastDiscountSummary.message && (
                       <p className="text-xs text-muted-foreground mt-1">
@@ -1014,7 +1047,10 @@ const Booking = () => {
                     {t("booking_payment_method", "Metodo di pagamento")}
                   </p>
                   <div className="rounded-md border border-border bg-card px-3 py-2 text-sm">
-                    {t("booking_in_person_payment", "Pagamento in presenza in barberia")}
+                    {t(
+                      "booking_in_person_payment",
+                      "Pagamento in presenza in barberia",
+                    )}
                   </div>
 
                   <Button
@@ -1028,7 +1064,9 @@ const Booking = () => {
                     }
                     className="font-heading w-full mt-2"
                   >
-                    {submitting ? t("booking_submitting", "Prenotazione...") : t("booking_confirm", "CONFERMA PRENOTAZIONE")}
+                    {submitting
+                      ? t("booking_submitting", "Prenotazione...")
+                      : t("booking_confirm", "CONFERMA PRENOTAZIONE")}
                   </Button>
                 </div>
               </div>
