@@ -15,19 +15,8 @@ const Login = () => {
   const { signIn } = useAuth();
   const { language } = useLanguage();
   const navigate = useNavigate();
-  const text = language === "it"
+  const text = language === "ma"
     ? {
-        errorTitle: "Errore di accesso",
-        welcomeBack: "Bentornato!",
-        subtitle: "Accedi al tuo account",
-        phone: "Telefono",
-        password: "Password",
-        loginLoading: "Accesso in corso...",
-        login: "Accedi",
-        noAccount: "Non hai un account?",
-        register: "Registrati",
-      }
-    : {
         errorTitle: "Khata2 f dkhol",
         welcomeBack: "Marhba b3awda!",
         subtitle: "Dkhol l 7ساب dyalek",
@@ -37,6 +26,17 @@ const Login = () => {
         login: "Dkhol",
         noAccount: "Ma3endekch compte?",
         register: "Sajjel",
+      }
+    : {
+        errorTitle: "Errore di accesso",
+        welcomeBack: "Bentornato!",
+        subtitle: "Accedi al tuo account",
+        phone: "Telefono",
+        password: "Password",
+        loginLoading: "Accesso in corso...",
+        login: "Accedi",
+        noAccount: "Non hai un account?",
+        register: "Registrati",
       };
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -58,7 +58,7 @@ const Login = () => {
         <div className="text-center">
           <Link to="/" className="inline-flex items-center gap-2">
             <Scissors className="h-8 w-8 text-primary" />
-            <span className="font-heading text-3xl font-bold gold-text">CHINCOA CORTES</span>
+            <span className="font-heading text-3xl font-bold gold-text">Nome da sua barbearia</span>
           </Link>
           <p className="mt-3 text-muted-foreground">{text.subtitle}</p>
         </div>

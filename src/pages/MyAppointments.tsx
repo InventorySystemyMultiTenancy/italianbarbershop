@@ -81,33 +81,8 @@ const MyAppointments = () => {
   const navigate = useNavigate();
   const [appointments, setAppointments] = useState<Appointment[]>([]);
   const [loading, setLoading] = useState(true);
-  const text = language === "it"
+  const text = language === "ma"
     ? {
-        loadError: "Errore nel caricamento appuntamenti",
-        whatsappError: "Impossibile aprire WhatsApp",
-        whatsappErrorDesc: "Controlla se il browser ha bloccato l'apertura della nuova scheda.",
-        cancelConfirm: "Vuoi annullare questo appuntamento?",
-        canceled: "Appuntamento annullato",
-        cancelError: "Errore durante l'annullamento",
-        statusScheduled: "Prenotato",
-        statusPaid: "Pagato",
-        statusAvailable: "Disponibile",
-        authLoading: "Caricamento autenticazione...",
-        titleA: "I MIEI",
-        titleB: "APPUNTAMENTI",
-        subtitle: "Gestisci i tuoi orari",
-        loading: "Caricamento...",
-        empty: "Nessun appuntamento trovato",
-        bookNow: "PRENOTA ORA",
-        value: "Valore",
-        birthdayDiscount: "Sconto compleanno applicato",
-        original: "Originale",
-        final: "Finale",
-        sendWhatsApp: "Invia su WhatsApp",
-        cancel: "Annulla",
-        invalidDate: "Data non valida",
-      }
-    : {
         loadError: "Khata2 f t7mil lmawaid",
         whatsappError: "Ma9drnach n7ello WhatsApp",
         whatsappErrorDesc: "Chof ila lbrowser sedd 7ell tab jdida.",
@@ -131,6 +106,31 @@ const MyAppointments = () => {
         sendWhatsApp: "Sift l WhatsApp",
         cancel: "Lghi",
         invalidDate: "Tarikh ghalet",
+      }
+    : {
+        loadError: "Errore nel caricamento appuntamenti",
+        whatsappError: "Impossibile aprire WhatsApp",
+        whatsappErrorDesc: "Controlla se il browser ha bloccato l'apertura della nuova scheda.",
+        cancelConfirm: "Vuoi annullare questo appuntamento?",
+        canceled: "Appuntamento annullato",
+        cancelError: "Errore durante l'annullamento",
+        statusScheduled: "Prenotato",
+        statusPaid: "Pagato",
+        statusAvailable: "Disponibile",
+        authLoading: "Caricamento autenticazione...",
+        titleA: "I MIEI",
+        titleB: "APPUNTAMENTI",
+        subtitle: "Gestisci i tuoi orari",
+        loading: "Caricamento...",
+        empty: "Nessun appuntamento trovato",
+        bookNow: "PRENOTA ORA",
+        value: "Valore",
+        birthdayDiscount: "Sconto compleanno applicato",
+        original: "Originale",
+        final: "Finale",
+        sendWhatsApp: "Invia su WhatsApp",
+        cancel: "Annulla",
+        invalidDate: "Data non valida",
       };
 
   useEffect(() => {

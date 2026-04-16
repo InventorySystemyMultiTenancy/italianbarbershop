@@ -1966,3 +1966,72 @@ export async function cancelSubscription(reference: string): Promise<Subscriptio
 
   return normalizeSubscriptionInfo(data);
 }
+
+export interface SiteLanguage {
+  id: string;
+  code: string;
+  name: string;
+  countryCode: string;
+  flag: string;
+  enabled: boolean;
+  createdAt?: string;
+  updatedAt?: string;
+}
+
+export interface CreateSiteLanguagePayload {
+  code: string;
+  name: string;
+  countryCode: string;
+  flag?: string;
+  enabled?: boolean;
+}
+
+function normalizeSiteLanguage(raw: any): SiteLanguage {
+  return {
+    id: String(raw?.id ?? raw?._id ?? raw?.code ?? ""),
+    code: String(raw?.code ?? "").toLowerCase(),
+    name: String(raw?.name ?? ""),
+    countryCode: String(raw?.country_code ?? raw?.countryCode ?? "").toUpperCase(),
+    flag: String(raw?.flag ?? ""),
+    enabled: Boolean(raw?.enabled ?? raw?.is_enabled ?? raw?.isEnabled ?? true),
+    createdAt: raw?.created_at ?? raw?.createdAt ?? undefined,
+    updatedAt: raw?.updated_at ?? raw?.updatedAt ?? undefined,
+  };
+}
+
+export async function getSiteLanguages(): Promise<SiteLanguage[]> {
+  const data = await apiRequest<any>(`/api/languages?_t=${Date.now()}`, { method: "GET" }, false);
+  const items = extractCollection<any>(data, ["languages", "items", "data"]);
+
+  return items
+    .map(normalizeSiteLanguage)
+    .filter((language) => Boolean(language.code) && Boolean(language.name) && Boolean(language.countryCode));
+}
+
+export async function createAdminSiteLanguage(payload: CreateSiteLanguagePayload): Promise<SiteLanguage> {
+  const safeCode = String(payload.code || "").trim().toLowerCase();
+  const safeName = String(payload.name || "").trim();
+  const safeCountryCode = String(payload.countryCode || "").trim().toUpperCase();
+  const safeFlag = String(payload.flag || "").trim();
+
+  if (!safeCode || !safeName || !safeCountryCode) {
+    throw new ApiClientError("Codigo, nome e pais da lingua sao obrigatorios.", 400, "VALIDATION_ERROR");
+  }
+
+  const data = await apiRequest<any>(
+    "/api/admin/languages",
+    {
+      method: "POST",
+      body: JSON.stringify({
+        code: safeCode,
+        name: safeName,
+        country_code: safeCountryCode,
+        flag: safeFlag || undefined,
+        enabled: payload.enabled ?? true,
+      }),
+    },
+    true,
+  );
+
+  return normalizeSiteLanguage(data);
+}

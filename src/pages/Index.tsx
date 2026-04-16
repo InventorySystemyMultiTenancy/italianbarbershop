@@ -23,30 +23,8 @@ function isBirthdayToday(dateText?: string) {
 const Index = () => {
   const { user, birthdayDiscount, refreshSession } = useAuth();
   const { language } = useLanguage();
-  const text = language === "it"
+  const text = language === "ma"
     ? {
-        birthdayTitle: "Auguri! Sconto compleanno attivo",
-        birthdayFallback: "Hai il 50% sul taglio oggi.",
-        birthdayPercentSuffix: "sul taglio oggi",
-        premiumBarber: "Barberia Premium",
-        heroTitleA: "STILE CHE",
-        heroTitleB: "TI DEFINISCE",
-        heroSubtitle: "Esperienza premium nel taglio maschile. Prenota online e blocca il tuo orario.",
-        bookNow: "PRENOTA ORA",
-        servicesA: "I NOSTRI",
-        servicesB: "SERVIZI",
-        ctaA: "PRONTO PER IL",
-        ctaB: "TUO TAGLIO",
-        ctaSubtitle: "Registrati e prenota il tuo orario in pochi secondi.",
-        startNow: "INIZIA ORA",
-        footer: "© 2026 Chincoa Cortes. Tutti i diritti riservati.",
-        services: [
-          { title: "Taglio Uomo", desc: "Taglio personalizzato con tecniche moderne", price: "R$ 50" },
-          { title: "Barboterapia", desc: "Cura e finitura professionale della barba", price: "R$ 40" },
-          { title: "Taglio & Barba", desc: "Combo completo taglio + barba", price: "R$ 85" },
-        ],
-      }
-    : {
         birthdayTitle: "Mabrouk! Tkhfida dyal 3id lmilad khdama",
         birthdayFallback: "3endek 50% f l9assa lyoum.",
         birthdayPercentSuffix: "f l9assa lyoum",
@@ -61,11 +39,33 @@ const Index = () => {
         ctaB: "L9ASSA DYALK",
         ctaSubtitle: "Sajjel w hjz lwa9t dyalek f chi tawani.",
         startNow: "BDA DABA",
-        footer: "© 2026 Chincoa Cortes. Ga3 l7oukou9 ma7foda.",
+        footer: "© 2026 Nome da sua barbearia. Ga3 l7oukou9 ma7foda.",
         services: [
           { title: "L9assa dyal rjal", desc: "L9assa 3la 7sab style dyalek b tari9a 3asriya", price: "R$ 50" },
           { title: "3inaya b l7ya", desc: "3inaya m3a finition m7tarfa", price: "R$ 40" },
           { title: "L9assa & L7ya", desc: "Pack kamel l9assa m3a l7ya", price: "R$ 85" },
+        ],
+      }
+    : {
+        birthdayTitle: "Auguri! Sconto compleanno attivo",
+        birthdayFallback: "Hai il 50% sul taglio oggi.",
+        birthdayPercentSuffix: "sul taglio oggi",
+        premiumBarber: "Barberia Premium",
+        heroTitleA: "STILE CHE",
+        heroTitleB: "TI DEFINISCE",
+        heroSubtitle: "Esperienza premium nel taglio maschile. Prenota online e blocca il tuo orario.",
+        bookNow: "PRENOTA ORA",
+        servicesA: "I NOSTRI",
+        servicesB: "SERVIZI",
+        ctaA: "PRONTO PER IL",
+        ctaB: "TUO TAGLIO",
+        ctaSubtitle: "Registrati e prenota il tuo orario in pochi secondi.",
+        startNow: "INIZIA ORA",
+        footer: "© 2026 Nome da sua barbearia. Tutti i diritti riservati.",
+        services: [
+          { title: "Taglio Uomo", desc: "Taglio personalizzato con tecniche moderne", price: "R$ 50" },
+          { title: "Barboterapia", desc: "Cura e finitura professionale della barba", price: "R$ 40" },
+          { title: "Taglio & Barba", desc: "Combo completo taglio + barba", price: "R$ 85" },
         ],
       };
   const hasBirthdayPromo = Boolean(
@@ -106,7 +106,7 @@ const Index = () => {
 
           <img
             src={logoImage}
-            alt="Logo Chincoa Cortes"
+            alt="Logo Nome da sua barbearia"
             className="h-20 w-20 md:h-24 md:w-24 object-contain mx-auto mb-2"
           />
 

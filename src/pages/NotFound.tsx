@@ -5,9 +5,9 @@ import { useLanguage } from "@/contexts/LanguageContext";
 const NotFound = () => {
   const location = useLocation();
   const { language } = useLanguage();
-  const text = language === "it"
-    ? { message: "Ops! Pagina non trovata", back: "Torna alla home" }
-    : { message: "Oops! Saf7a machi mawjouda", back: "Rje3 l saf7a l2owla" };
+  const text = language === "ma"
+    ? { message: "Oops! Saf7a machi mawjouda", back: "Rje3 l saf7a l2owla" }
+    : { message: "Ops! Pagina non trovata", back: "Torna alla home" };
 
   useEffect(() => {
     console.error("404 Error: User attempted to access non-existent route:", location.pathname);

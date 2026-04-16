@@ -13,6 +13,7 @@ import Register from "./pages/Register";
 import Booking from "./pages/Booking";
 import MyAppointments from "./pages/MyAppointments";
 import AdminDashboard from "./pages/AdminDashboard";
+import AdminLanguages from "./pages/AdminLanguages";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -57,6 +58,7 @@ const App = () => {
                 <Route path="/agendar" element={<Booking />} />
                 <Route path="/meus-agendamentos" element={<MyAppointments />} />
                 <Route path="/admin" element={<AdminDashboard />} />
+                <Route path="/admin/languages" element={<AdminLanguages />} />
                 <Route path="*" element={<NotFound />} />
               </Routes>
             </AuthProvider>

@@ -18,25 +18,8 @@ const Register = () => {
   const { signUp } = useAuth();
   const { language } = useLanguage();
   const navigate = useNavigate();
-  const text = language === "it"
+  const text = language === "ma"
     ? {
-        minPassword: "La password deve avere almeno 6 caratteri",
-        birthRequired: "Inserisci la tua data di nascita",
-        registerError: "Errore durante la registrazione",
-        success: "Account creato con successo!",
-        subtitle: "Crea il tuo account",
-        fullName: "Nome completo",
-        phone: "Telefono",
-        birthDate: "Data di nascita",
-        emailOptional: "Email (opzionale)",
-        password: "Password",
-        passwordPlaceholder: "Minimo 6 caratteri",
-        creating: "Creazione account...",
-        register: "Registrati",
-        hasAccount: "Hai gia un account?",
-        loginHere: "Accedi qui",
-      }
-    : {
         minPassword: "Mot de passe khaso ykon fih 6 7orof 3la l9al",
         birthRequired: "3afak dkhel tarikh lmilad dyalek",
         registerError: "Khata2 f tsjil",
@@ -52,6 +35,23 @@ const Register = () => {
         register: "Sajjel",
         hasAccount: "3endek compte deja?",
         loginHere: "Dkhol mn hna",
+      }
+    : {
+        minPassword: "La password deve avere almeno 6 caratteri",
+        birthRequired: "Inserisci la tua data di nascita",
+        registerError: "Errore durante la registrazione",
+        success: "Account creato con successo!",
+        subtitle: "Crea il tuo account",
+        fullName: "Nome completo",
+        phone: "Telefono",
+        birthDate: "Data di nascita",
+        emailOptional: "Email (opzionale)",
+        password: "Password",
+        passwordPlaceholder: "Minimo 6 caratteri",
+        creating: "Creazione account...",
+        register: "Registrati",
+        hasAccount: "Hai gia un account?",
+        loginHere: "Accedi qui",
       };
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -89,7 +89,7 @@ const Register = () => {
         <div className="text-center">
           <Link to="/" className="inline-flex items-center gap-2">
             <Scissors className="h-8 w-8 text-primary" />
-            <span className="font-heading text-3xl font-bold gold-text">CHINCOA CORTS</span>
+            <span className="font-heading text-3xl font-bold gold-text">Nome da sua barbearia</span>
           </Link>
           <p className="mt-3 text-muted-foreground">{text.subtitle}</p>
         </div>
