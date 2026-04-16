@@ -4,6 +4,7 @@ import { Globe2, Plus } from "lucide-react";
 import Header from "@/components/Header";
 import { useAuth } from "@/contexts/AuthContext";
 import { useLanguage } from "../contexts/LanguageContext";
+import { getLanguageCatalogOptions, type LanguageCatalogOption } from "@/lib/api";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -24,12 +25,46 @@ const AdminLanguages = () => {
   const [code, setCode] = useState("");
   const [name, setName] = useState("");
   const [countryCode, setCountryCode] = useState("");
+  const [catalogOptions, setCatalogOptions] = useState<LanguageCatalogOption[]>([]);
+  const [catalogLoading, setCatalogLoading] = useState(false);
+  const [catalogError, setCatalogError] = useState<string | null>(null);
+  const [selectedCatalogCode, setSelectedCatalogCode] = useState("");
 
   useEffect(() => {
     if (!authLoading && (!user || !isAdmin)) {
       navigate("/");
     }
   }, [authLoading, user, isAdmin, navigate]);
+
+  useEffect(() => {
+    if (!user || !isAdmin) return;
+
+    const loadCatalog = async () => {
+      setCatalogLoading(true);
+      setCatalogError(null);
+      try {
+        const catalog = await getLanguageCatalogOptions();
+        setCatalogOptions(catalog);
+      } catch (error) {
+        setCatalogOptions([]);
+        setCatalogError(error instanceof Error ? error.message : "Nao foi possivel carregar catalogo de linguas.");
+      } finally {
+        setCatalogLoading(false);
+      }
+    };
+
+    void loadCatalog();
+  }, [user, isAdmin]);
+
+  const handleCatalogSelection = (value: string) => {
+    setSelectedCatalogCode(value);
+    const selected = catalogOptions.find((option) => option.code === value);
+    if (!selected) return;
+
+    setCode(selected.code);
+    setName(selected.name);
+    setCountryCode(selected.countryCode);
+  };
 
   if (authLoading) {
     return (
@@ -97,6 +132,32 @@ const AdminLanguages = () => {
 
         <div className="glass rounded-lg p-6">
           <form className="grid grid-cols-1 md:grid-cols-4 gap-4" onSubmit={handleSubmit}>
+            <div className="space-y-2 md:col-span-4">
+              <Label htmlFor="lang-catalog">Sugestoes da API de linguas</Label>
+              <select
+                id="lang-catalog"
+                value={selectedCatalogCode}
+                onChange={(event) => handleCatalogSelection(event.target.value)}
+                className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm"
+                disabled={catalogLoading || catalogOptions.length === 0}
+              >
+                <option value="">
+                  {catalogLoading
+                    ? "Carregando linguas da API..."
+                    : catalogOptions.length > 0
+                      ? "Selecione um idioma sugerido"
+                      : "Nenhuma sugestao da API disponivel"}
+                </option>
+                {catalogOptions.map((option) => (
+                  <option key={`${option.code}-${option.countryCode}`} value={option.code}>
+                    {option.flag ? `${option.flag} ` : ""}
+                    {option.name} ({option.code.toUpperCase()} - {option.countryCode})
+                  </option>
+                ))}
+              </select>
+              {catalogError && <p className="text-xs text-destructive">{catalogError}</p>}
+            </div>
+
             <div className="space-y-2">
               <Label htmlFor="lang-code">Codigo</Label>
               <Input

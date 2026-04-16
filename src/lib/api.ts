@@ -1986,6 +1986,13 @@ export interface CreateSiteLanguagePayload {
   enabled?: boolean;
 }
 
+export interface LanguageCatalogOption {
+  code: string;
+  name: string;
+  countryCode: string;
+  flag: string;
+}
+
 function normalizeSiteLanguage(raw: any): SiteLanguage {
   return {
     id: String(raw?.id ?? raw?._id ?? raw?.code ?? ""),
@@ -1997,6 +2004,46 @@ function normalizeSiteLanguage(raw: any): SiteLanguage {
     createdAt: raw?.created_at ?? raw?.createdAt ?? undefined,
     updatedAt: raw?.updated_at ?? raw?.updatedAt ?? undefined,
   };
+}
+
+function normalizeLanguageCatalogOption(raw: any): LanguageCatalogOption {
+  return {
+    code: String(raw?.code ?? raw?.language_code ?? "").trim().toLowerCase(),
+    name: String(raw?.name ?? raw?.language_name ?? "").trim(),
+    countryCode: String(raw?.country_code ?? raw?.countryCode ?? "").trim().toUpperCase(),
+    flag: String(raw?.flag ?? "").trim(),
+  };
+}
+
+export async function getLanguageCatalogOptions(): Promise<LanguageCatalogOption[]> {
+  const candidateEndpoints = [
+    `/api/languages/catalog?_t=${Date.now()}`,
+    `/api/languages/options?_t=${Date.now()}`,
+    `/api/i18n/languages?_t=${Date.now()}`,
+    `/api/languages?_t=${Date.now()}`,
+  ];
+
+  for (const endpoint of candidateEndpoints) {
+    try {
+      const data = await apiRequest<any>(endpoint, { method: "GET" }, false);
+      const items = extractCollection<any>(data, ["languages", "items", "data", "catalog"]);
+
+      const normalized = items
+        .map(normalizeLanguageCatalogOption)
+        .filter((item) => Boolean(item.code) && Boolean(item.name) && Boolean(item.countryCode));
+
+      if (normalized.length > 0) {
+        return normalized;
+      }
+    } catch (error) {
+      if (error instanceof ApiClientError && (error.status === 404 || error.status === 405)) {
+        continue;
+      }
+      throw error;
+    }
+  }
+
+  return [];
 }
 
 export async function getSiteLanguages(): Promise<SiteLanguage[]> {
