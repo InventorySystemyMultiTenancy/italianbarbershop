@@ -1,7 +1,7 @@
 const rawApiBaseUrl =
   import.meta.env.VITE_FRONTEND_API_URL ||
   import.meta.env.VITE_API_URL ||
-  (import.meta.env.DEV ? "http://localhost:3001" : "https://chincoa-backend.onrender.com");
+  (import.meta.env.DEV ? "http://localhost:3001" : "https://italianbarber-backend.onrender.com");
 
 export const API_BASE_URL = rawApiBaseUrl.replace(/\/$/, "");
 export const hasApiBaseUrl = API_BASE_URL.length > 0;
