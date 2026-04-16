@@ -1,5 +1,5 @@
 # The Barber Hub
-
+#gabriel
 Projeto reorganizado em duas camadas:
 
 - `frontend`: aplicação React + Vite (interface web)
