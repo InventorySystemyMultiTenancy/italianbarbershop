@@ -22,7 +22,7 @@ interface UseI18nResult {
 }
 
 const LANGUAGE_STORAGE_KEY = "app_language";
-const CACHE_PREFIX = "app_i18n_cache_v2_";
+const CACHE_PREFIX = "app_i18n_cache_v3_";
 
 function getCacheKey(language: string) {
   return `${CACHE_PREFIX}${language}`;
