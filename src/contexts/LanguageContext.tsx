@@ -9,7 +9,10 @@ import {
   type SiteLanguage,
 } from "@/lib/api";
 import { useI18n } from "@/hooks/useI18n";
-import { UI_TRANSLATION_ENTRIES_PT } from "@/lib/i18nEntries";
+import {
+  UI_TRANSLATION_ENTRIES_PT,
+  UI_TRANSLATION_ENTRIES_IT,
+} from "@/lib/i18nEntries";
 import type { Translations } from "@/lib/i18n";
 
 export type AppLanguage = string;
@@ -48,24 +51,54 @@ interface LanguageContextType {
 const LANGUAGE_LIST_STORAGE_KEY = "app-language-list";
 
 const DEFAULT_LANGUAGES: AvailableLanguage[] = [
-  { code: "pt", name: "Portugues", countryCode: "BR", flag: "🇧🇷", enabled: true },
-  { code: "it", name: "Italiano", countryCode: "IT", flag: "🇮🇹", enabled: true },
-  { code: "ma", name: "Moroccan", countryCode: "MA", flag: "🇲🇦", enabled: true },
+  {
+    code: "pt",
+    name: "Português",
+    countryCode: "PT",
+    flag: "🇵🇹",
+    enabled: true,
+  },
+  {
+    code: "it",
+    name: "Italiano",
+    countryCode: "IT",
+    flag: "🇮🇹",
+    enabled: true,
+  },
+  { code: "en", name: "English", countryCode: "GB", flag: "🇬🇧", enabled: true },
+  { code: "es", name: "Español", countryCode: "ES", flag: "🇪🇸", enabled: true },
+  {
+    code: "ma",
+    name: "Maroquino (Darija)",
+    countryCode: "MA",
+    flag: "🇲🇦",
+    enabled: true,
+  },
 ];
 
-const LanguageContext = createContext<LanguageContextType | undefined>(undefined);
+const LanguageContext = createContext<LanguageContextType | undefined>(
+  undefined,
+);
 
 function toFlagEmoji(countryCode: string) {
-  const safe = String(countryCode || "").trim().toUpperCase();
+  const safe = String(countryCode || "")
+    .trim()
+    .toUpperCase();
   if (!/^[A-Z]{2}$/.test(safe)) return "🌐";
   const codePoints = [...safe].map((char) => 127397 + char.charCodeAt(0));
   return String.fromCodePoint(...codePoints);
 }
 
-function normalizeLanguage(raw: Partial<AvailableLanguage>): AvailableLanguage | null {
-  const code = String(raw.code || "").trim().toLowerCase();
+function normalizeLanguage(
+  raw: Partial<AvailableLanguage>,
+): AvailableLanguage | null {
+  const code = String(raw.code || "")
+    .trim()
+    .toLowerCase();
   const name = String(raw.name || "").trim();
-  const countryCode = String(raw.countryCode || "").trim().toUpperCase();
+  const countryCode = String(raw.countryCode || "")
+    .trim()
+    .toUpperCase();
   const enabled = raw.enabled ?? true;
 
   if (!code || !name || !countryCode) return null;
@@ -96,7 +129,9 @@ function mergeLanguages(languages: AvailableLanguage[]) {
   for (const language of languages) {
     byCode.set(language.code, language);
   }
-  return Array.from(byCode.values()).filter((language) => language.enabled !== false);
+  return Array.from(byCode.values()).filter(
+    (language) => language.enabled !== false,
+  );
 }
 
 function readStoredLanguages() {
@@ -105,7 +140,9 @@ function readStoredLanguages() {
     if (!raw) return DEFAULT_LANGUAGES;
     const parsed = JSON.parse(raw) as Partial<AvailableLanguage>[];
     if (!Array.isArray(parsed)) return DEFAULT_LANGUAGES;
-    const normalized = parsed.map(normalizeLanguage).filter(Boolean) as AvailableLanguage[];
+    const normalized = parsed
+      .map(normalizeLanguage)
+      .filter(Boolean) as AvailableLanguage[];
     return mergeLanguages(normalized);
   } catch {
     return DEFAULT_LANGUAGES;
@@ -113,7 +150,9 @@ function readStoredLanguages() {
 }
 
 export function LanguageProvider({ children }: { children: ReactNode }) {
-  const [availableLanguages, setAvailableLanguages] = useState<AvailableLanguage[]>(() => readStoredLanguages());
+  const [availableLanguages, setAvailableLanguages] = useState<
+    AvailableLanguage[]
+  >(() => readStoredLanguages());
   const [addingLanguage, setAddingLanguage] = useState(false);
 
   const {
@@ -125,15 +164,20 @@ export function LanguageProvider({ children }: { children: ReactNode }) {
     t,
   } = useI18n({
     entries: UI_TRANSLATION_ENTRIES_PT,
+    fallbackEntries: UI_TRANSLATION_ENTRIES_IT,
     defaultLanguage: "pt",
   });
 
   const reloadLanguages = async () => {
     try {
       const fromApi = await getSiteLanguages();
-      const normalized = fromApi.map(fromApiLanguage).filter(Boolean) as AvailableLanguage[];
+      const normalized = fromApi
+        .map(fromApiLanguage)
+        .filter(Boolean) as AvailableLanguage[];
       if (normalized.length > 0) {
-        setAvailableLanguages((prev) => mergeLanguages([...prev, ...normalized]));
+        setAvailableLanguages((prev) =>
+          mergeLanguages([...prev, ...normalized]),
+        );
       }
     } catch {
       // Keep local languages when backend endpoint is unavailable.
@@ -170,11 +214,17 @@ export function LanguageProvider({ children }: { children: ReactNode }) {
   };
 
   const selectedLanguage = useMemo(() => {
-    return availableLanguages.find((item) => item.code === currentLanguage) || DEFAULT_LANGUAGES[0];
+    return (
+      availableLanguages.find((item) => item.code === currentLanguage) ||
+      DEFAULT_LANGUAGES[0]
+    );
   }, [availableLanguages, currentLanguage]);
 
   useEffect(() => {
-    localStorage.setItem(LANGUAGE_LIST_STORAGE_KEY, JSON.stringify(availableLanguages));
+    localStorage.setItem(
+      LANGUAGE_LIST_STORAGE_KEY,
+      JSON.stringify(availableLanguages),
+    );
   }, [availableLanguages]);
 
   useEffect(() => {
@@ -190,11 +240,7 @@ export function LanguageProvider({ children }: { children: ReactNode }) {
   const value = useMemo<LanguageContextType>(() => {
     const safeLanguage = currentLanguage.toLowerCase();
     const dateFnsLocale =
-      safeLanguage === "ma"
-        ? arSA
-        : safeLanguage === "it"
-          ? itLocale
-          : ptBR;
+      safeLanguage === "ma" ? arSA : safeLanguage === "it" ? itLocale : ptBR;
 
     const currencyLocale =
       safeLanguage === "ma"
@@ -230,11 +276,16 @@ export function LanguageProvider({ children }: { children: ReactNode }) {
     t,
   ]);
 
-  return <LanguageContext.Provider value={value}>{children}</LanguageContext.Provider>;
+  return (
+    <LanguageContext.Provider value={value}>
+      {children}
+    </LanguageContext.Provider>
+  );
 }
 
 export function useLanguage() {
   const context = useContext(LanguageContext);
-  if (!context) throw new Error("useLanguage must be used within LanguageProvider");
+  if (!context)
+    throw new Error("useLanguage must be used within LanguageProvider");
   return context;
 }

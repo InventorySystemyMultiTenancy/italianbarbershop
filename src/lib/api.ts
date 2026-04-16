@@ -1,12 +1,15 @@
 const rawApiBaseUrl =
   import.meta.env.VITE_FRONTEND_API_URL ||
   import.meta.env.VITE_API_URL ||
-  (import.meta.env.DEV ? "http://localhost:3001" : "https://italianbarber-backend.onrender.com");
+  (import.meta.env.DEV
+    ? "http://localhost:3001"
+    : "https://italianbarber-backend.onrender.com");
 
 export const API_BASE_URL = rawApiBaseUrl.replace(/\/$/, "");
 export const hasApiBaseUrl = API_BASE_URL.length > 0;
 const DEFAULT_REQUEST_TIMEOUT_MS = 20_000;
-const ENABLE_API_DEBUG = import.meta.env.DEV || import.meta.env.VITE_API_DEBUG === "true";
+const ENABLE_API_DEBUG =
+  import.meta.env.DEV || import.meta.env.VITE_API_DEBUG === "true";
 
 export const SESSION_TOKEN_KEY = "session_token";
 export const SESSION_USER_KEY = "session_user";
@@ -30,7 +33,12 @@ export class ApiClientError extends Error {
   code?: string;
   details?: unknown;
 
-  constructor(message: string, status: number, code?: string, details?: unknown) {
+  constructor(
+    message: string,
+    status: number,
+    code?: string,
+    details?: unknown,
+  ) {
     super(message);
     this.name = "ApiClientError";
     this.status = status;
@@ -71,7 +79,11 @@ export interface BackendHealth {
   timestamp: string;
 }
 
-export type AppointmentStatus = "agendado" | "pago" | "disponivel" | "desabilitado";
+export type AppointmentStatus =
+  | "agendado"
+  | "pago"
+  | "disponivel"
+  | "desabilitado";
 
 export interface Appointment {
   id: string;
@@ -296,7 +308,12 @@ export interface PaymentStatusResponse {
   paymentIntentId?: string;
 }
 
-export type SubscriptionStatus = "authorized" | "pending" | "paused" | "canceled" | "unknown";
+export type SubscriptionStatus =
+  | "authorized"
+  | "pending"
+  | "paused"
+  | "canceled"
+  | "unknown";
 
 export interface SubscriptionPlanPayload {
   name: string;
@@ -416,21 +433,34 @@ export function getFriendlyErrorMessage(error: unknown) {
   }
 
   if (error.status === 0) return "Backend indisponivel no momento.";
-  if (error.code === "REQUEST_TIMEOUT") return "A requisicao demorou demais. Tente novamente.";
-  if (error.status === 401 || error.code === "AUTH_TOKEN_EXPIRED") return "Sessao expirada, faca login novamente.";
-  if (error.status === 403 || error.code === "FORBIDDEN_ADMIN_ONLY") return "Acesso restrito.";
+  if (error.code === "REQUEST_TIMEOUT")
+    return "A requisicao demorou demais. Tente novamente.";
+  if (error.status === 401 || error.code === "AUTH_TOKEN_EXPIRED")
+    return "Sessao expirada, faca login novamente.";
+  if (error.status === 403 || error.code === "FORBIDDEN_ADMIN_ONLY")
+    return "Acesso restrito.";
   if (error.status === 404) return "Recurso nao encontrado.";
-  if (error.code === "42P10") return "Erro interno ao salvar assinatura. O backend precisa ajustar uma constraint no banco.";
-  if (error.code === "SLOT_ALREADY_BOOKED") return "Horario ja reservado. Escolha outro.";
+  if (error.code === "42P10")
+    return "Erro interno ao salvar assinatura. O backend precisa ajustar uma constraint no banco.";
+  if (error.code === "SLOT_ALREADY_BOOKED")
+    return "Horario ja reservado. Escolha outro.";
   if (error.code === "SLOT_DISABLED") return "Esse horario esta desabilitado.";
-  if (error.code === "DAY_DISABLED") return "Esse dia esta indisponivel para atendimento.";
-  if (error.code === "PAST_APPOINTMENT") return "Nao e permitido agendar horario passado no dia atual.";
-  if (error.code === "PAID_APPOINTMENT_CANNOT_CANCEL") return "Nao e permitido cancelar um agendamento pago.";
-  if (error.code === "VALIDATION_ERROR") return "Revise os dados e tente novamente.";
-  if (error.code === "SUBSCRIPTION_NOT_FOUND") return "Assinatura nao encontrada.";
-  if (error.code === "SUBSCRIPTION_ALREADY_CANCELED") return "Essa assinatura ja foi cancelada.";
-  if (error.code === "PROVIDER_UNAVAILABLE") return "Provedor indisponivel, tente em instantes.";
-  if (error.code === "INVALID_SERVICE_TYPE") return "Servico invalido. Recarregue e selecione novamente.";
+  if (error.code === "DAY_DISABLED")
+    return "Esse dia esta indisponivel para atendimento.";
+  if (error.code === "PAST_APPOINTMENT")
+    return "Nao e permitido agendar horario passado no dia atual.";
+  if (error.code === "PAID_APPOINTMENT_CANNOT_CANCEL")
+    return "Nao e permitido cancelar um agendamento pago.";
+  if (error.code === "VALIDATION_ERROR")
+    return "Revise os dados e tente novamente.";
+  if (error.code === "SUBSCRIPTION_NOT_FOUND")
+    return "Assinatura nao encontrada.";
+  if (error.code === "SUBSCRIPTION_ALREADY_CANCELED")
+    return "Essa assinatura ja foi cancelada.";
+  if (error.code === "PROVIDER_UNAVAILABLE")
+    return "Provedor indisponivel, tente em instantes.";
+  if (error.code === "INVALID_SERVICE_TYPE")
+    return "Servico invalido. Recarregue e selecione novamente.";
 
   return error.message || "Erro inesperado ao comunicar com o backend.";
 }
@@ -441,22 +471,35 @@ function normalizeUser(raw: any): SessionUser {
     email: raw.email ? String(raw.email) : undefined,
     fullName: raw.full_name ?? raw.fullName ?? undefined,
     phone: raw.phone ?? undefined,
-    birthDate: normalizeDateOnly(raw.birth_date ?? raw.birthDate ?? "") || undefined,
+    birthDate:
+      normalizeDateOnly(raw.birth_date ?? raw.birthDate ?? "") || undefined,
     role: raw.role ?? "client",
   };
 }
 
 function normalizeBirthdayDiscount(raw: any): BirthdayDiscount {
   const discountPercentRaw =
-    raw?.discount_percent ?? raw?.discountPercent ?? raw?.discount_percentage ?? raw?.discountPercentage ?? 0;
+    raw?.discount_percent ??
+    raw?.discountPercent ??
+    raw?.discount_percentage ??
+    raw?.discountPercentage ??
+    0;
   const discountPercent = Number(discountPercentRaw || 0);
-  const activeFlag = raw?.active ?? raw?.is_active ?? raw?.applied ?? raw?.enabled;
+  const activeFlag =
+    raw?.active ?? raw?.is_active ?? raw?.applied ?? raw?.enabled;
 
   return {
     active: Boolean(activeFlag ?? discountPercent > 0),
-    serviceType: raw?.service_type ?? raw?.serviceType ?? raw?.service ?? undefined,
-    discountPercent: Number.isFinite(discountPercent) ? discountPercent : undefined,
-    message: raw?.message ?? raw?.congratulation_message ?? raw?.congratulations_message ?? null,
+    serviceType:
+      raw?.service_type ?? raw?.serviceType ?? raw?.service ?? undefined,
+    discountPercent: Number.isFinite(discountPercent)
+      ? discountPercent
+      : undefined,
+    message:
+      raw?.message ??
+      raw?.congratulation_message ??
+      raw?.congratulations_message ??
+      null,
   };
 }
 
@@ -499,11 +542,11 @@ function normalizeAppointment(raw: any): Appointment {
 
   const discountAppliedByFlags = Boolean(
     raw.discount_applied ??
-      raw.discountApplied ??
-      raw.has_discount ??
-      raw.hasDiscount ??
-      raw.is_birthday_discount ??
-      raw.isBirthdayDiscount,
+    raw.discountApplied ??
+    raw.has_discount ??
+    raw.hasDiscount ??
+    raw.is_birthday_discount ??
+    raw.isBirthdayDiscount,
   );
 
   const discountType =
@@ -543,12 +586,20 @@ function normalizeAppointment(raw: any): Appointment {
       : undefined;
 
   const normalizedBasePrice =
-    basePriceFromRaw !== undefined && basePriceFromRaw !== null ? Number(basePriceFromRaw) : undefined;
+    basePriceFromRaw !== undefined && basePriceFromRaw !== null
+      ? Number(basePriceFromRaw)
+      : undefined;
 
   const normalizedFinalPrice =
-    finalPriceFromRaw !== undefined && finalPriceFromRaw !== null ? Number(finalPriceFromRaw) : undefined;
+    finalPriceFromRaw !== undefined && finalPriceFromRaw !== null
+      ? Number(finalPriceFromRaw)
+      : undefined;
 
-  const isBirthdayType = String(discountType || "").toLowerCase().includes("birthday") || Boolean(raw.is_birthday_discount ?? raw.isBirthdayDiscount);
+  const isBirthdayType =
+    String(discountType || "")
+      .toLowerCase()
+      .includes("birthday") ||
+    Boolean(raw.is_birthday_discount ?? raw.isBirthdayDiscount);
 
   const hasAnyDiscountSignal =
     Boolean(discountRaw) ||
@@ -557,7 +608,11 @@ function normalizeAppointment(raw: any): Appointment {
     (normalizedDiscountPercent !== undefined && normalizedDiscountPercent > 0);
 
   const paymentMethod =
-    raw.payment_method ?? raw.paymentMethod ?? raw.payment?.method ?? raw.paymentMethodChoice ?? undefined;
+    raw.payment_method ??
+    raw.paymentMethod ??
+    raw.payment?.method ??
+    raw.paymentMethodChoice ??
+    undefined;
 
   const subscriptionSource =
     raw.subscription ??
@@ -617,7 +672,9 @@ function normalizeAppointment(raw: any): Appointment {
 
   const isPremiumSubscriber =
     Boolean(premiumFlagRaw) ||
-    (normalizedSubscriptionStatus ? isPremiumSubscriptionStatus(normalizedSubscriptionStatus) : false);
+    (normalizedSubscriptionStatus
+      ? isPremiumSubscriptionStatus(normalizedSubscriptionStatus)
+      : false);
 
   const subscriptionIsActiveRaw =
     raw.subscription_is_active ??
@@ -646,17 +703,33 @@ function normalizeAppointment(raw: any): Appointment {
 
   return {
     id: String(raw.id),
-    appointmentDate: normalizeDateOnly(raw.appointment_date ?? raw.appointmentDate ?? ""),
-    appointmentTime: normalizeTime(String(raw.appointment_time ?? raw.appointmentTime ?? "")),
+    appointmentDate: normalizeDateOnly(
+      raw.appointment_date ?? raw.appointmentDate ?? "",
+    ),
+    appointmentTime: normalizeTime(
+      String(raw.appointment_time ?? raw.appointmentTime ?? ""),
+    ),
     status: (raw.status ?? "disponivel") as AppointmentStatus,
     price: Number(raw.price ?? 45),
     serviceType: raw.service_type ?? raw.serviceType ?? undefined,
     serviceLabel: raw.service_label ?? raw.serviceLabel ?? undefined,
     userId: raw.user_id ?? raw.userId ?? undefined,
-    fullName: raw.full_name ?? raw.fullName ?? raw.user?.full_name ?? raw.user?.fullName ?? undefined,
+    fullName:
+      raw.full_name ??
+      raw.fullName ??
+      raw.user?.full_name ??
+      raw.user?.fullName ??
+      undefined,
     email: raw.email ?? raw.user?.email ?? undefined,
     phone: raw.phone ?? raw.user?.phone ?? undefined,
-    birthDate: normalizeDateOnly(raw.birth_date ?? raw.birthDate ?? raw.user?.birth_date ?? raw.user?.birthDate ?? "") || undefined,
+    birthDate:
+      normalizeDateOnly(
+        raw.birth_date ??
+          raw.birthDate ??
+          raw.user?.birth_date ??
+          raw.user?.birthDate ??
+          "",
+      ) || undefined,
     paymentMethod: paymentMethod ? String(paymentMethod) : undefined,
     subscriptionStatus: normalizedSubscriptionStatus,
     subscriptionIsActive:
@@ -664,16 +737,28 @@ function normalizeAppointment(raw: any): Appointment {
         ? Boolean(subscriptionIsActiveRaw)
         : undefined,
     subscriptionIsCanceled:
-      subscriptionIsCanceledRaw !== undefined && subscriptionIsCanceledRaw !== null
+      subscriptionIsCanceledRaw !== undefined &&
+      subscriptionIsCanceledRaw !== null
         ? Boolean(subscriptionIsCanceledRaw)
         : undefined,
-    subscriptionState: subscriptionStateRaw ? String(subscriptionStateRaw) : undefined,
-    subscriptionPlanName: subscriptionPlanName ? String(subscriptionPlanName) : undefined,
-    subscriptionPlanId: subscriptionPlanId ? String(subscriptionPlanId) : undefined,
+    subscriptionState: subscriptionStateRaw
+      ? String(subscriptionStateRaw)
+      : undefined,
+    subscriptionPlanName: subscriptionPlanName
+      ? String(subscriptionPlanName)
+      : undefined,
+    subscriptionPlanId: subscriptionPlanId
+      ? String(subscriptionPlanId)
+      : undefined,
     isPremiumSubscriber,
     discount: hasAnyDiscountSignal
       ? {
-          applied: Boolean(discountRaw?.applied ?? discountAppliedByFlags ?? isBirthdayType ?? false),
+          applied: Boolean(
+            discountRaw?.applied ??
+            discountAppliedByFlags ??
+            isBirthdayType ??
+            false,
+          ),
           type: discountType,
           discountPercent: normalizedDiscountPercent,
           basePrice: normalizedBasePrice,
@@ -694,7 +779,12 @@ function normalizeBarber(raw: any): Barber {
   return {
     id: String(raw?.id ?? raw?.barber_id ?? raw?.barberId ?? ""),
     fullName: String(raw?.full_name ?? raw?.fullName ?? raw?.name ?? ""),
-    imageUrl: raw?.image_url ?? raw?.imageUrl ?? raw?.avatar_url ?? raw?.avatarUrl ?? null,
+    imageUrl:
+      raw?.image_url ??
+      raw?.imageUrl ??
+      raw?.avatar_url ??
+      raw?.avatarUrl ??
+      null,
     isActive: Boolean(raw?.is_active ?? raw?.isActive ?? true),
   };
 }
@@ -704,16 +794,19 @@ function normalizePaymentStatus(statusRaw: unknown): PaymentStatus {
 
   if (normalized === "approved") return "approved";
   if (normalized === "rejected") return "rejected";
-  if (normalized === "canceled" || normalized === "cancelled") return "canceled";
+  if (normalized === "canceled" || normalized === "cancelled")
+    return "canceled";
   return "pending";
 }
 
 function normalizeSubscriptionStatus(statusRaw: unknown): SubscriptionStatus {
   const normalized = String(statusRaw || "").toLowerCase();
-  if (normalized === "authorized" || normalized === "active") return "authorized";
+  if (normalized === "authorized" || normalized === "active")
+    return "authorized";
   if (normalized === "pending") return "pending";
   if (normalized === "paused") return "paused";
-  if (normalized === "canceled" || normalized === "cancelled") return "canceled";
+  if (normalized === "canceled" || normalized === "cancelled")
+    return "canceled";
   return "unknown";
 }
 
@@ -723,13 +816,21 @@ function isPremiumSubscriptionStatus(statusRaw: unknown) {
 }
 
 function normalizeSubscriptionPlan(raw: any): SubscriptionPlan {
-  const transactionAmount = Number(raw?.transaction_amount ?? raw?.transactionAmount ?? 0);
+  const transactionAmount = Number(
+    raw?.transaction_amount ?? raw?.transactionAmount ?? 0,
+  );
 
   return {
-    id: String(raw?.id ?? raw?.preapproval_plan_id ?? raw?.preapprovalPlanId ?? ""),
+    id: String(
+      raw?.id ?? raw?.preapproval_plan_id ?? raw?.preapprovalPlanId ?? "",
+    ),
     name: raw?.name ?? undefined,
     description: raw?.description ?? undefined,
-    preapprovalPlanId: raw?.preapproval_plan_id ?? raw?.preapprovalPlanId ?? raw?.id ?? undefined,
+    preapprovalPlanId:
+      raw?.preapproval_plan_id ??
+      raw?.preapprovalPlanId ??
+      raw?.id ??
+      undefined,
     transactionAmount,
     frequency: Number(raw?.frequency ?? 0) || undefined,
     frequencyType: raw?.frequency_type ?? raw?.frequencyType ?? undefined,
@@ -740,7 +841,12 @@ function normalizeSubscriptionPlan(raw: any): SubscriptionPlan {
 }
 
 function normalizeSubscriptionAttempt(raw: any): SubscriptionAttempt {
-  const createdAt = raw?.created_at ?? raw?.createdAt ?? raw?.payment_date ?? raw?.paymentDate ?? undefined;
+  const createdAt =
+    raw?.created_at ??
+    raw?.createdAt ??
+    raw?.payment_date ??
+    raw?.paymentDate ??
+    undefined;
   return {
     id: raw?.id ? String(raw.id) : undefined,
     status: raw?.status ?? raw?.attempt_status ?? undefined,
@@ -754,8 +860,16 @@ function normalizeSubscriptionAttempt(raw: any): SubscriptionAttempt {
   };
 }
 
-function normalizeSubscriptionProviderEvent(raw: any): SubscriptionProviderEvent {
-  const createdAt = raw?.created_at ?? raw?.createdAt ?? raw?.date ?? raw?.event_date ?? raw?.eventDate ?? undefined;
+function normalizeSubscriptionProviderEvent(
+  raw: any,
+): SubscriptionProviderEvent {
+  const createdAt =
+    raw?.created_at ??
+    raw?.createdAt ??
+    raw?.date ??
+    raw?.event_date ??
+    raw?.eventDate ??
+    undefined;
   return {
     id: raw?.id ? String(raw.id) : undefined,
     type: raw?.type ?? raw?.event_type ?? raw?.eventType ?? undefined,
@@ -770,7 +884,14 @@ function normalizeSubscriptionProviderEvent(raw: any): SubscriptionProviderEvent
 function normalizeSubscriptionInfo(raw: any): SubscriptionInfo {
   const source = raw?.subscription ?? raw?.preapproval ?? raw;
 
-  const id = String(source?.id ?? source?.subscription_id ?? source?.subscriptionId ?? source?.preapproval_id ?? source?.preapprovalId ?? "");
+  const id = String(
+    source?.id ??
+      source?.subscription_id ??
+      source?.subscriptionId ??
+      source?.preapproval_id ??
+      source?.preapprovalId ??
+      "",
+  );
   const mpPreapprovalId =
     source?.mp_preapproval_id ??
     source?.mpPreapprovalId ??
@@ -787,26 +908,37 @@ function normalizeSubscriptionInfo(raw: any): SubscriptionInfo {
     source?.nextPaymentAt ??
     undefined;
 
-  const attempts = extractCollection(source, ["attempts", "payment_attempts", "paymentAttempts"]).map(
-    normalizeSubscriptionAttempt,
-  );
-  const providerEvents = extractCollection(source, ["provider_events", "providerEvents", "events"]).map(
-    normalizeSubscriptionProviderEvent,
-  );
+  const attempts = extractCollection(source, [
+    "attempts",
+    "payment_attempts",
+    "paymentAttempts",
+  ]).map(normalizeSubscriptionAttempt);
+  const providerEvents = extractCollection(source, [
+    "provider_events",
+    "providerEvents",
+    "events",
+  ]).map(normalizeSubscriptionProviderEvent);
 
   return {
     id,
     mpPreapprovalId: mpPreapprovalId ? String(mpPreapprovalId) : undefined,
-    preapprovalPlanId: source?.preapproval_plan_id ?? source?.preapprovalPlanId ?? undefined,
+    preapprovalPlanId:
+      source?.preapproval_plan_id ?? source?.preapprovalPlanId ?? undefined,
     status: normalizeSubscriptionStatus(source?.status),
-    providerStatus: source?.provider_status ?? source?.providerStatus ?? undefined,
-    nextPaymentDate: nextPaymentDateRaw ? String(nextPaymentDateRaw) : undefined,
+    providerStatus:
+      source?.provider_status ?? source?.providerStatus ?? undefined,
+    nextPaymentDate: nextPaymentDateRaw
+      ? String(nextPaymentDateRaw)
+      : undefined,
     reason: source?.reason ?? source?.description ?? undefined,
-    transactionAmount: Number(source?.transaction_amount ?? source?.transactionAmount ?? 0) || undefined,
+    transactionAmount:
+      Number(source?.transaction_amount ?? source?.transactionAmount ?? 0) ||
+      undefined,
     currencyId: source?.currency_id ?? source?.currencyId ?? undefined,
     frequency: Number(source?.frequency ?? 0) || undefined,
     frequencyType: source?.frequency_type ?? source?.frequencyType ?? undefined,
-    email: source?.email ?? source?.payer_email ?? source?.payerEmail ?? undefined,
+    email:
+      source?.email ?? source?.payer_email ?? source?.payerEmail ?? undefined,
     isActive:
       source?.is_active !== undefined && source?.is_active !== null
         ? Boolean(source?.is_active)
@@ -819,7 +951,8 @@ function normalizeSubscriptionInfo(raw: any): SubscriptionInfo {
         : source?.isCanceled !== undefined && source?.isCanceled !== null
           ? Boolean(source?.isCanceled)
           : undefined,
-    subscriptionState: source?.subscription_state ?? source?.subscriptionState ?? undefined,
+    subscriptionState:
+      source?.subscription_state ?? source?.subscriptionState ?? undefined,
     attempts,
     providerEvents,
   };
@@ -891,7 +1024,9 @@ function normalizeAdminSubscriber(raw: any): AdminSubscriber {
     undefined;
 
   const transactionAmount =
-    amountRaw !== undefined && amountRaw !== null && Number.isFinite(Number(amountRaw))
+    amountRaw !== undefined &&
+    amountRaw !== null &&
+    Number.isFinite(Number(amountRaw))
       ? Number(amountRaw)
       : undefined;
 
@@ -901,7 +1036,9 @@ function normalizeAdminSubscriber(raw: any): AdminSubscriber {
     email: raw.email ?? raw.user?.email ?? undefined,
     phone: raw.phone ?? raw.user?.phone ?? undefined,
     planName: planName ? String(planName) : undefined,
-    preapprovalPlanId: preapprovalPlanId ? String(preapprovalPlanId) : undefined,
+    preapprovalPlanId: preapprovalPlanId
+      ? String(preapprovalPlanId)
+      : undefined,
     subscriptionId: subscriptionId ? String(subscriptionId) : undefined,
     status,
     isActive:
@@ -937,20 +1074,32 @@ function normalizePixPaymentResponse(raw: any): PixPaymentResponse {
     appointmentId: String(raw?.appointmentId ?? raw?.appointment_id ?? ""),
     paymentId: raw?.paymentId ?? raw?.payment_id ?? undefined,
     paymentIntentId: raw?.paymentIntentId ?? raw?.payment_intent_id ?? null,
-    paymentStatus: raw?.paymentStatus || raw?.payment_status ? normalizePaymentStatus(raw?.paymentStatus ?? raw?.payment_status) : undefined,
+    paymentStatus:
+      raw?.paymentStatus || raw?.payment_status
+        ? normalizePaymentStatus(raw?.paymentStatus ?? raw?.payment_status)
+        : undefined,
     providerStatus: raw?.providerStatus ?? raw?.provider_status ?? undefined,
     paymentMethod: raw?.paymentMethod ?? raw?.payment_method ?? undefined,
     qrCodeBase64: raw?.qrCodeBase64 ?? raw?.qr_code_base64 ?? undefined,
-    qrCodeCopyPaste: raw?.qrCodeCopyPaste ?? raw?.qr_code_copy_paste ?? raw?.qrCode ?? raw?.qr_code ?? undefined,
+    qrCodeCopyPaste:
+      raw?.qrCodeCopyPaste ??
+      raw?.qr_code_copy_paste ??
+      raw?.qrCode ??
+      raw?.qr_code ??
+      undefined,
   };
 }
 
 function normalizePointPaymentResponse(raw: any): PointPaymentResponse {
   return {
     appointmentId: String(raw?.appointmentId ?? raw?.appointment_id ?? ""),
-    paymentIntentId: raw?.paymentIntentId ?? raw?.payment_intent_id ?? undefined,
+    paymentIntentId:
+      raw?.paymentIntentId ?? raw?.payment_intent_id ?? undefined,
     paymentId: raw?.paymentId ?? raw?.payment_id ?? undefined,
-    paymentStatus: raw?.paymentStatus || raw?.payment_status ? normalizePaymentStatus(raw?.paymentStatus ?? raw?.payment_status) : undefined,
+    paymentStatus:
+      raw?.paymentStatus || raw?.payment_status
+        ? normalizePaymentStatus(raw?.paymentStatus ?? raw?.payment_status)
+        : undefined,
     providerStatus: raw?.providerStatus ?? raw?.provider_status ?? undefined,
     paymentMethod: raw?.paymentMethod ?? raw?.payment_method ?? undefined,
   };
@@ -958,19 +1107,24 @@ function normalizePointPaymentResponse(raw: any): PointPaymentResponse {
 
 function normalizePaymentStatusResponse(raw: any): PaymentStatusResponse {
   return {
-    status: normalizePaymentStatus(raw?.status ?? raw?.paymentStatus ?? raw?.payment_status),
+    status: normalizePaymentStatus(
+      raw?.status ?? raw?.paymentStatus ?? raw?.payment_status,
+    ),
     providerStatus: raw?.providerStatus ?? raw?.provider_status ?? undefined,
     paymentMethod: raw?.paymentMethod ?? raw?.payment_method ?? undefined,
     appointmentId: raw?.appointmentId ?? raw?.appointment_id ?? undefined,
     paymentId: raw?.paymentId ?? raw?.payment_id ?? undefined,
-    paymentIntentId: raw?.paymentIntentId ?? raw?.payment_intent_id ?? undefined,
+    paymentIntentId:
+      raw?.paymentIntentId ?? raw?.payment_intent_id ?? undefined,
   };
 }
 
 function normalizeAppointmentService(raw: any): AppointmentService {
   return {
     key: String(raw.key ?? raw.service_type ?? raw.serviceType ?? ""),
-    label: String(raw.label ?? raw.service_label ?? raw.serviceLabel ?? "Servico"),
+    label: String(
+      raw.label ?? raw.service_label ?? raw.serviceLabel ?? "Servico",
+    ),
     price: Number(raw.price ?? 0),
   };
 }
@@ -983,7 +1137,11 @@ function pickFirstDefined(raw: any, paths: string[]) {
     let current: any = raw;
 
     for (const segment of segments) {
-      if (current === null || current === undefined || typeof current !== "object") {
+      if (
+        current === null ||
+        current === undefined ||
+        typeof current !== "object"
+      ) {
         current = undefined;
         break;
       }
@@ -999,7 +1157,8 @@ function pickFirstDefined(raw: any, paths: string[]) {
 }
 
 function normalizeFinancialReport(raw: any): FinancialReport {
-  const source = (pickFirstDefined(raw, ["summary", "financial", "report"]) as any) ?? raw;
+  const source =
+    (pickFirstDefined(raw, ["summary", "financial", "report"]) as any) ?? raw;
 
   const paidAppointmentsCount = Number(
     pickFirstDefined(source, [
@@ -1076,7 +1235,13 @@ function normalizeFinancialReport(raw: any): FinancialReport {
   );
 
   const netProfit = Number(
-    pickFirstDefined(source, ["net_profit", "netProfit", "lucro_liquido", "lucroLiquido", "net"]) ?? 0,
+    pickFirstDefined(source, [
+      "net_profit",
+      "netProfit",
+      "lucro_liquido",
+      "lucroLiquido",
+      "net",
+    ]) ?? 0,
   );
 
   return {
@@ -1091,7 +1256,13 @@ function normalizeFinancialReport(raw: any): FinancialReport {
         ]) ?? "",
       ),
       endDate: normalizeDateOnly(
-        pickFirstDefined(source, ["period.end_date", "period.endDate", "end_date", "endDate", "range.end"]) ?? "",
+        pickFirstDefined(source, [
+          "period.end_date",
+          "period.endDate",
+          "end_date",
+          "endDate",
+          "range.end",
+        ]) ?? "",
       ),
     },
     paidAppointmentsCount,
@@ -1106,12 +1277,24 @@ function normalizeFinancialReport(raw: any): FinancialReport {
 function normalizeFixedExpense(raw: any): FixedExpense {
   const title = String(raw.title ?? raw.name ?? raw.description ?? "");
   const amount = Number(raw.amount ?? raw.value ?? 0);
-  const startsOn = normalizeDateOnly(raw.starts_on ?? raw.startsOn ?? raw.start_date ?? raw.startDate ?? "");
-  const endsOn = normalizeDateOnly(raw.ends_on ?? raw.endsOn ?? raw.end_date ?? raw.endDate ?? "") || undefined;
+  const startsOn = normalizeDateOnly(
+    raw.starts_on ?? raw.startsOn ?? raw.start_date ?? raw.startDate ?? "",
+  );
+  const endsOn =
+    normalizeDateOnly(
+      raw.ends_on ?? raw.endsOn ?? raw.end_date ?? raw.endDate ?? "",
+    ) || undefined;
   const fallbackId = `${title || "expense"}-${startsOn || "no-date"}-${amount}`;
 
   return {
-    id: String(raw.id ?? raw.expense_id ?? raw.expenseId ?? raw.fixed_expense_id ?? raw.fixedExpenseId ?? fallbackId),
+    id: String(
+      raw.id ??
+        raw.expense_id ??
+        raw.expenseId ??
+        raw.fixed_expense_id ??
+        raw.fixedExpenseId ??
+        fallbackId,
+    ),
     title,
     amount,
     startsOn,
@@ -1124,11 +1307,20 @@ function normalizeFixedExpense(raw: any): FixedExpense {
 function normalizeVariableExpense(raw: any): VariableExpense {
   const title = String(raw.title ?? raw.name ?? raw.description ?? "");
   const amount = Number(raw.amount ?? raw.value ?? 0);
-  const expenseDate = normalizeDateOnly(raw.expense_date ?? raw.expenseDate ?? raw.date ?? "");
+  const expenseDate = normalizeDateOnly(
+    raw.expense_date ?? raw.expenseDate ?? raw.date ?? "",
+  );
   const fallbackId = `${title || "expense"}-${expenseDate || "no-date"}-${amount}`;
 
   return {
-    id: String(raw.id ?? raw.expense_id ?? raw.expenseId ?? raw.variable_expense_id ?? raw.variableExpenseId ?? fallbackId),
+    id: String(
+      raw.id ??
+        raw.expense_id ??
+        raw.expenseId ??
+        raw.variable_expense_id ??
+        raw.variableExpenseId ??
+        fallbackId,
+    ),
     title,
     amount,
     expenseDate,
@@ -1138,13 +1330,24 @@ function normalizeVariableExpense(raw: any): VariableExpense {
 
 function normalizeSlot(raw: any): AppointmentSlot {
   const overrideIdRaw =
-    raw.day_hour_override_id ?? raw.dayHourOverrideId ?? raw.day_hour_id ?? raw.dayHourId ?? raw.override_id ?? raw.overrideId;
+    raw.day_hour_override_id ??
+    raw.dayHourOverrideId ??
+    raw.day_hour_id ??
+    raw.dayHourId ??
+    raw.override_id ??
+    raw.overrideId;
 
   const barberIdRaw = raw.barber_id ?? raw.barberId ?? raw.barber?.id;
-  const barberNameRaw = raw.barber_name ?? raw.barberName ?? raw.barber?.full_name ?? raw.barber?.fullName;
+  const barberNameRaw =
+    raw.barber_name ??
+    raw.barberName ??
+    raw.barber?.full_name ??
+    raw.barber?.fullName;
 
   return {
-    time: normalizeTime(String(raw.time ?? raw.appointment_time ?? raw.appointmentTime ?? "")),
+    time: normalizeTime(
+      String(raw.time ?? raw.appointment_time ?? raw.appointmentTime ?? ""),
+    ),
     status: (raw.status ?? "disponivel") as AppointmentStatus,
     appointmentId: raw.appointment_id ?? raw.appointmentId ?? undefined,
     reason: raw.reason ?? undefined,
@@ -1155,14 +1358,29 @@ function normalizeSlot(raw: any): AppointmentSlot {
 }
 
 function normalizeDayHour(raw: any): DayHour {
-  const time = normalizeTime(String(raw.time ?? raw.slot_time ?? raw.slotTime ?? ""));
-  const date = normalizeDateOnly(raw.date ?? raw.day ?? raw.appointment_date ?? raw.appointmentDate ?? "");
+  const time = normalizeTime(
+    String(raw.time ?? raw.slot_time ?? raw.slotTime ?? ""),
+  );
+  const date = normalizeDateOnly(
+    raw.date ?? raw.day ?? raw.appointment_date ?? raw.appointmentDate ?? "",
+  );
 
   const barberIdRaw = raw.barber_id ?? raw.barberId ?? raw.barber?.id;
-  const barberNameRaw = raw.barber_name ?? raw.barberName ?? raw.barber?.full_name ?? raw.barber?.fullName;
+  const barberNameRaw =
+    raw.barber_name ??
+    raw.barberName ??
+    raw.barber?.full_name ??
+    raw.barber?.fullName;
 
   const fallbackId = `${date || "no-date"}-${time || "no-time"}-${String(barberIdRaw || "global")}`;
-  const id = String(raw.id ?? raw.day_hour_id ?? raw.dayHourId ?? raw.override_id ?? raw.overrideId ?? fallbackId);
+  const id = String(
+    raw.id ??
+      raw.day_hour_id ??
+      raw.dayHourId ??
+      raw.override_id ??
+      raw.overrideId ??
+      fallbackId,
+  );
 
   return {
     id,
@@ -1185,9 +1403,25 @@ function normalizeSlotsMeta(raw: any): SlotsMeta {
     serverNow: raw?.server_now ?? raw?.serverNow ?? undefined,
     weekStart: raw?.week_start ?? raw?.weekStart ?? undefined,
     weekEnd: raw?.week_end ?? raw?.weekEnd ?? undefined,
-    bookingWindowStart: normalizeDateOnly(raw?.booking_window_start ?? raw?.bookingWindowStart ?? raw?.window_start ?? raw?.windowStart ?? "") || undefined,
-    bookingWindowEnd: normalizeDateOnly(raw?.booking_window_end ?? raw?.bookingWindowEnd ?? raw?.window_end ?? raw?.windowEnd ?? "") || undefined,
-    retentionStart: normalizeDateOnly(raw?.retention_start ?? raw?.retentionStart ?? "") || undefined,
+    bookingWindowStart:
+      normalizeDateOnly(
+        raw?.booking_window_start ??
+          raw?.bookingWindowStart ??
+          raw?.window_start ??
+          raw?.windowStart ??
+          "",
+      ) || undefined,
+    bookingWindowEnd:
+      normalizeDateOnly(
+        raw?.booking_window_end ??
+          raw?.bookingWindowEnd ??
+          raw?.window_end ??
+          raw?.windowEnd ??
+          "",
+      ) || undefined,
+    retentionStart:
+      normalizeDateOnly(raw?.retention_start ?? raw?.retentionStart ?? "") ||
+      undefined,
   };
 }
 
@@ -1240,9 +1474,17 @@ async function parseResponse<T>(response: Response): Promise<T> {
   return raw as T;
 }
 
-async function apiRequest<T>(path: string, init?: RequestInit, requiresAuth = true): Promise<T> {
+async function apiRequest<T>(
+  path: string,
+  init?: RequestInit,
+  requiresAuth = true,
+): Promise<T> {
   if (!hasApiBaseUrl) {
-    throw new ApiClientError("VITE_FRONTEND_API_URL nao configurada.", 0, "API_URL_MISSING");
+    throw new ApiClientError(
+      "VITE_FRONTEND_API_URL nao configurada.",
+      0,
+      "API_URL_MISSING",
+    );
   }
 
   const headers = new Headers(init?.headers || {});
@@ -1257,7 +1499,10 @@ async function apiRequest<T>(path: string, init?: RequestInit, requiresAuth = tr
 
   let response: Response;
   const controller = new AbortController();
-  const timeoutId = window.setTimeout(() => controller.abort(), DEFAULT_REQUEST_TIMEOUT_MS);
+  const timeoutId = window.setTimeout(
+    () => controller.abort(),
+    DEFAULT_REQUEST_TIMEOUT_MS,
+  );
 
   try {
     const method = (init?.method || "GET").toUpperCase();
@@ -1274,7 +1519,11 @@ async function apiRequest<T>(path: string, init?: RequestInit, requiresAuth = tr
     });
   } catch (error) {
     if (error instanceof DOMException && error.name === "AbortError") {
-      throw new ApiClientError("Tempo limite excedido na requisicao.", 0, "REQUEST_TIMEOUT");
+      throw new ApiClientError(
+        "Tempo limite excedido na requisicao.",
+        0,
+        "REQUEST_TIMEOUT",
+      );
     }
 
     logApiDebug("Network error", {
@@ -1282,7 +1531,12 @@ async function apiRequest<T>(path: string, init?: RequestInit, requiresAuth = tr
       method: init?.method || "GET",
       error: error instanceof Error ? error.message : String(error),
     });
-    throw new ApiClientError("Falha de conexao com backend.", 0, "BACKEND_UNAVAILABLE", error);
+    throw new ApiClientError(
+      "Falha de conexao com backend.",
+      0,
+      "BACKEND_UNAVAILABLE",
+      error,
+    );
   } finally {
     window.clearTimeout(timeoutId);
   }
@@ -1336,21 +1590,34 @@ export async function me(): Promise<SessionInfo> {
   const source = data?.user ? data : { user: data, birthday_discount: null };
   return {
     user: normalizeUser(source.user ?? source),
-    birthdayDiscount: normalizeBirthdayDiscount(source.birthday_discount ?? source.birthdayDiscount ?? null),
+    birthdayDiscount: normalizeBirthdayDiscount(
+      source.birthday_discount ?? source.birthdayDiscount ?? null,
+    ),
   };
 }
 
-export async function getSlotsByDate(date: string, barberId: string): Promise<SlotsByDateResponse> {
+export async function getSlotsByDate(
+  date: string,
+  barberId: string,
+): Promise<SlotsByDateResponse> {
   const safeDate = String(date || "").trim();
   const safeBarberId = String(barberId || "").trim();
   if (!safeDate || !safeBarberId) {
-    throw new ApiClientError("Data e barbeiro sao obrigatorios para consultar horarios.", 400, "VALIDATION_ERROR");
+    throw new ApiClientError(
+      "Data e barbeiro sao obrigatorios para consultar horarios.",
+      400,
+      "VALIDATION_ERROR",
+    );
   }
 
   const query = new URLSearchParams({ date: safeDate, _t: String(Date.now()) });
   query.set("barber_id", safeBarberId);
 
-  const data = await apiRequest<any>(`/api/appointments/slots?${query.toString()}`, { method: "GET" }, true);
+  const data = await apiRequest<any>(
+    `/api/appointments/slots?${query.toString()}`,
+    { method: "GET" },
+    true,
+  );
   const slots = extractCollection(data, ["slots", "appointmentSlots", "items"]);
   const meta = normalizeSlotsMeta(data?.meta ?? data);
 
@@ -1361,7 +1628,11 @@ export async function getSlotsByDate(date: string, barberId: string): Promise<Sl
 }
 
 export async function getAppointmentServices(): Promise<AppointmentService[]> {
-  const data = await apiRequest<any>(`/api/appointments/services?_t=${Date.now()}`, { method: "GET" }, true);
+  const data = await apiRequest<any>(
+    `/api/appointments/services?_t=${Date.now()}`,
+    { method: "GET" },
+    true,
+  );
   const services = extractCollection(data, ["services", "items"]);
 
   return services
@@ -1373,16 +1644,31 @@ export async function getBarbers(activeOnly = false): Promise<Barber[]> {
   const endpoint = activeOnly ? "/api/barbers/active" : "/api/barbers";
 
   try {
-    const data = await apiRequest<any>(`${endpoint}?_t=${Date.now()}`, { method: "GET" }, true);
+    const data = await apiRequest<any>(
+      `${endpoint}?_t=${Date.now()}`,
+      { method: "GET" },
+      true,
+    );
     const barbers = extractCollection(data, ["barbers", "items"]);
-    return barbers.map(normalizeBarber).filter((barber) => barber.id.length > 0 && barber.fullName.length > 0);
+    return barbers
+      .map(normalizeBarber)
+      .filter((barber) => barber.id.length > 0 && barber.fullName.length > 0);
   } catch (error) {
     if (activeOnly && error instanceof ApiClientError && error.status === 404) {
-      const fallback = await apiRequest<any>(`/api/barbers?_t=${Date.now()}`, { method: "GET" }, true);
+      const fallback = await apiRequest<any>(
+        `/api/barbers?_t=${Date.now()}`,
+        { method: "GET" },
+        true,
+      );
       const barbers = extractCollection(fallback, ["barbers", "items"]);
       return barbers
         .map(normalizeBarber)
-        .filter((barber) => barber.id.length > 0 && barber.fullName.length > 0 && barber.isActive);
+        .filter(
+          (barber) =>
+            barber.id.length > 0 &&
+            barber.fullName.length > 0 &&
+            barber.isActive,
+        );
     }
 
     throw error;
@@ -1390,7 +1676,11 @@ export async function getBarbers(activeOnly = false): Promise<Barber[]> {
 }
 
 export async function getMyAppointments(): Promise<Appointment[]> {
-  const data = await apiRequest<any>("/api/appointments/me", { method: "GET" }, true);
+  const data = await apiRequest<any>(
+    "/api/appointments/me",
+    { method: "GET" },
+    true,
+  );
   const appointments = extractCollection(data, ["appointments", "items"]);
   return appointments.map(normalizeAppointment);
 }
@@ -1407,7 +1697,11 @@ export async function createAppointment(input: {
   const serviceType = String(input.serviceType || "").trim();
   const barberId = String(input.barberId || "").trim();
   if (!date || !time || !serviceType || !barberId) {
-    throw new ApiClientError("Servico, barbeiro, data e horario sao obrigatorios.", 400, "VALIDATION_ERROR");
+    throw new ApiClientError(
+      "Servico, barbeiro, data e horario sao obrigatorios.",
+      400,
+      "VALIDATION_ERROR",
+    );
   }
 
   const payload: Record<string, unknown> = {
@@ -1433,11 +1727,21 @@ export async function createAppointment(input: {
 }
 
 export async function cancelMyAppointment(id: string) {
-  await apiRequest<unknown>(`/api/appointments/${id}`, { method: "DELETE" }, true);
+  await apiRequest<unknown>(
+    `/api/appointments/${id}`,
+    { method: "DELETE" },
+    true,
+  );
 }
 
-export async function getAdminAppointmentsByDate(date: string): Promise<Appointment[]> {
-  const data = await apiRequest<any>(`/api/admin/appointments?date=${encodeURIComponent(date)}`, { method: "GET" }, true);
+export async function getAdminAppointmentsByDate(
+  date: string,
+): Promise<Appointment[]> {
+  const data = await apiRequest<any>(
+    `/api/admin/appointments?date=${encodeURIComponent(date)}`,
+    { method: "GET" },
+    true,
+  );
   const appointments = extractCollection(data, ["appointments", "items"]);
   return appointments.map(normalizeAppointment);
 }
@@ -1445,34 +1749,78 @@ export async function getAdminAppointmentsByDate(date: string): Promise<Appointm
 export async function getAdminDayHoursByDate(date: string): Promise<DayHour[]> {
   const safeDate = normalizeDateOnly(date);
   if (!safeDate) {
-    throw new ApiClientError("Data invalida para consultar grade diaria.", 400, "VALIDATION_ERROR");
+    throw new ApiClientError(
+      "Data invalida para consultar grade diaria.",
+      400,
+      "VALIDATION_ERROR",
+    );
   }
 
-  const query = new URLSearchParams({ date: safeDate, _t: String(Date.now()) }).toString();
-  const data = await apiRequest<any>(`/api/admin/schedule/day-hours?${query}`, { method: "GET" }, true);
-  const rows = extractCollection(data, ["day_hours", "dayHours", "overrides", "items", "rows"]);
+  const query = new URLSearchParams({
+    date: safeDate,
+    _t: String(Date.now()),
+  }).toString();
+  const data = await apiRequest<any>(
+    `/api/admin/schedule/day-hours?${query}`,
+    { method: "GET" },
+    true,
+  );
+  const rows = extractCollection(data, [
+    "day_hours",
+    "dayHours",
+    "overrides",
+    "items",
+    "rows",
+  ]);
   return rows.map(normalizeDayHour).filter((item) => item.time.length > 0);
 }
 
-export async function getAdminDayHoursByRange(from: string, to: string): Promise<DayHour[]> {
+export async function getAdminDayHoursByRange(
+  from: string,
+  to: string,
+): Promise<DayHour[]> {
   const safeFrom = normalizeDateOnly(from);
   const safeTo = normalizeDateOnly(to);
   if (!safeFrom || !safeTo) {
-    throw new ApiClientError("Periodo invalido para consultar grade diaria.", 400, "VALIDATION_ERROR");
+    throw new ApiClientError(
+      "Periodo invalido para consultar grade diaria.",
+      400,
+      "VALIDATION_ERROR",
+    );
   }
 
-  const query = new URLSearchParams({ from: safeFrom, to: safeTo, _t: String(Date.now()) }).toString();
-  const data = await apiRequest<any>(`/api/admin/schedule/day-hours?${query}`, { method: "GET" }, true);
-  const rows = extractCollection(data, ["day_hours", "dayHours", "overrides", "items", "rows"]);
+  const query = new URLSearchParams({
+    from: safeFrom,
+    to: safeTo,
+    _t: String(Date.now()),
+  }).toString();
+  const data = await apiRequest<any>(
+    `/api/admin/schedule/day-hours?${query}`,
+    { method: "GET" },
+    true,
+  );
+  const rows = extractCollection(data, [
+    "day_hours",
+    "dayHours",
+    "overrides",
+    "items",
+    "rows",
+  ]);
   return rows.map(normalizeDayHour).filter((item) => item.time.length > 0);
 }
 
-export async function createAdminDayHour(payload: CreateDayHourPayload): Promise<DayHour> {
+export async function createAdminDayHour(
+  payload: CreateDayHourPayload,
+): Promise<DayHour> {
   const safeDate = normalizeDateOnly(payload.date);
   const safeTime = normalizeTime(payload.time);
 
   if (!safeDate || !safeTime) {
-    throw new ApiClientError("Data e horario sao obrigatorios.", 400, "VALIDATION_ERROR");
+    throw new ApiClientError(
+      "Data e horario sao obrigatorios.",
+      400,
+      "VALIDATION_ERROR",
+    );
   }
 
   const data = await apiRequest<any>(
@@ -1489,13 +1837,22 @@ export async function createAdminDayHour(payload: CreateDayHourPayload): Promise
     true,
   );
 
-  return normalizeDayHour(data?.day_hour ?? data?.dayHour ?? data?.override ?? data);
+  return normalizeDayHour(
+    data?.day_hour ?? data?.dayHour ?? data?.override ?? data,
+  );
 }
 
-export async function updateAdminDayHour(id: string, payload: UpdateDayHourPayload): Promise<DayHour> {
+export async function updateAdminDayHour(
+  id: string,
+  payload: UpdateDayHourPayload,
+): Promise<DayHour> {
   const safeId = String(id || "").trim();
   if (!safeId) {
-    throw new ApiClientError("ID do horario e obrigatorio.", 400, "VALIDATION_ERROR");
+    throw new ApiClientError(
+      "ID do horario e obrigatorio.",
+      400,
+      "VALIDATION_ERROR",
+    );
   }
 
   const body: Record<string, unknown> = {};
@@ -1513,25 +1870,43 @@ export async function updateAdminDayHour(id: string, payload: UpdateDayHourPaylo
     true,
   );
 
-  return normalizeDayHour(data?.day_hour ?? data?.dayHour ?? data?.override ?? data);
+  return normalizeDayHour(
+    data?.day_hour ?? data?.dayHour ?? data?.override ?? data,
+  );
 }
 
 export async function deleteAdminDayHour(id: string): Promise<void> {
   const safeId = String(id || "").trim();
   if (!safeId) {
-    throw new ApiClientError("ID do horario e obrigatorio.", 400, "VALIDATION_ERROR");
+    throw new ApiClientError(
+      "ID do horario e obrigatorio.",
+      400,
+      "VALIDATION_ERROR",
+    );
   }
 
-  await apiRequest<unknown>(`/api/admin/schedule/day-hours/${encodeURIComponent(safeId)}`, { method: "DELETE" }, true);
+  await apiRequest<unknown>(
+    `/api/admin/schedule/day-hours/${encodeURIComponent(safeId)}`,
+    { method: "DELETE" },
+    true,
+  );
 }
 
 export async function getAdminBarbers(): Promise<Barber[]> {
-  const data = await apiRequest<any>("/api/admin/barbers", { method: "GET" }, true);
+  const data = await apiRequest<any>(
+    "/api/admin/barbers",
+    { method: "GET" },
+    true,
+  );
   const barbers = extractCollection(data, ["barbers", "items"]);
-  return barbers.map(normalizeBarber).filter((barber) => barber.id.length > 0 && barber.fullName.length > 0);
+  return barbers
+    .map(normalizeBarber)
+    .filter((barber) => barber.id.length > 0 && barber.fullName.length > 0);
 }
 
-export async function createAdminBarber(payload: CreateBarberPayload): Promise<Barber> {
+export async function createAdminBarber(
+  payload: CreateBarberPayload,
+): Promise<Barber> {
   const data = await apiRequest<any>(
     "/api/admin/barbers",
     {
@@ -1544,7 +1919,10 @@ export async function createAdminBarber(payload: CreateBarberPayload): Promise<B
   return normalizeBarber(data?.barber ?? data);
 }
 
-export async function updateAdminBarber(id: string, payload: UpdateBarberPayload): Promise<Barber> {
+export async function updateAdminBarber(
+  id: string,
+  payload: UpdateBarberPayload,
+): Promise<Barber> {
   const data = await apiRequest<any>(
     `/api/admin/barbers/${id}`,
     {
@@ -1559,7 +1937,11 @@ export async function updateAdminBarber(id: string, payload: UpdateBarberPayload
 
 export async function deactivateAdminBarber(id: string): Promise<void> {
   try {
-    await apiRequest<unknown>(`/api/admin/barbers/${id}`, { method: "DELETE" }, true);
+    await apiRequest<unknown>(
+      `/api/admin/barbers/${id}`,
+      { method: "DELETE" },
+      true,
+    );
   } catch (error) {
     if (error instanceof ApiClientError && error.status === 404) {
       await apiRequest<unknown>(
@@ -1577,7 +1959,10 @@ export async function deactivateAdminBarber(id: string): Promise<void> {
   }
 }
 
-export async function updateAdminAppointmentStatus(id: string, status: AppointmentStatus) {
+export async function updateAdminAppointmentStatus(
+  id: string,
+  status: AppointmentStatus,
+) {
   await apiRequest<unknown>(
     `/api/admin/appointments/${id}/status`,
     {
@@ -1589,22 +1974,49 @@ export async function updateAdminAppointmentStatus(id: string, status: Appointme
 }
 
 export async function deleteAdminAppointment(id: string) {
-  await apiRequest<unknown>(`/api/admin/appointments/${id}`, { method: "DELETE" }, true);
+  await apiRequest<unknown>(
+    `/api/admin/appointments/${id}`,
+    { method: "DELETE" },
+    true,
+  );
 }
 
-export async function getAdminFinancialReport(startDate: string, endDate: string): Promise<FinancialReport> {
+export async function getAdminFinancialReport(
+  startDate: string,
+  endDate: string,
+): Promise<FinancialReport> {
   const query = new URLSearchParams({ startDate, endDate }).toString();
-  const data = await apiRequest<any>(`/api/admin/reports/financial?${query}`, { method: "GET" }, true);
-  return normalizeFinancialReport(data?.report ?? data?.summary ?? data?.financial ?? data);
+  const data = await apiRequest<any>(
+    `/api/admin/reports/financial?${query}`,
+    { method: "GET" },
+    true,
+  );
+  return normalizeFinancialReport(
+    data?.report ?? data?.summary ?? data?.financial ?? data,
+  );
 }
 
 export async function getAdminFixedExpenses(): Promise<FixedExpense[]> {
-  const data = await apiRequest<any>("/api/admin/expenses/fixed", { method: "GET" }, true);
-  const expenses = extractCollection(data, ["fixedExpenses", "fixed_expenses", "expenses", "items", "rows"]);
-  return expenses.map(normalizeFixedExpense).filter((expense) => expense.title.length > 0 || expense.amount > 0);
+  const data = await apiRequest<any>(
+    "/api/admin/expenses/fixed",
+    { method: "GET" },
+    true,
+  );
+  const expenses = extractCollection(data, [
+    "fixedExpenses",
+    "fixed_expenses",
+    "expenses",
+    "items",
+    "rows",
+  ]);
+  return expenses
+    .map(normalizeFixedExpense)
+    .filter((expense) => expense.title.length > 0 || expense.amount > 0);
 }
 
-export async function createAdminFixedExpense(payload: CreateFixedExpensePayload): Promise<FixedExpense> {
+export async function createAdminFixedExpense(
+  payload: CreateFixedExpensePayload,
+): Promise<FixedExpense> {
   const data = await apiRequest<any>(
     "/api/admin/expenses/fixed",
     {
@@ -1617,14 +2029,25 @@ export async function createAdminFixedExpense(payload: CreateFixedExpensePayload
   return normalizeFixedExpense(data?.fixed_expense ?? data?.expense ?? data);
 }
 
-export async function updateAdminFixedExpense(id: string, payload: UpdateFixedExpensePayload): Promise<FixedExpense> {
+export async function updateAdminFixedExpense(
+  id: string,
+  payload: UpdateFixedExpensePayload,
+): Promise<FixedExpense> {
   const safeId = String(id || "").trim();
   if (!safeId) {
-    throw new ApiClientError("ID do gasto fixo e obrigatorio.", 400, "VALIDATION_ERROR");
+    throw new ApiClientError(
+      "ID do gasto fixo e obrigatorio.",
+      400,
+      "VALIDATION_ERROR",
+    );
   }
 
   if (Object.keys(payload || {}).length === 0) {
-    throw new ApiClientError("Nenhum campo alterado para atualizar.", 400, "VALIDATION_ERROR");
+    throw new ApiClientError(
+      "Nenhum campo alterado para atualizar.",
+      400,
+      "VALIDATION_ERROR",
+    );
   }
 
   const data = await apiRequest<any>(
@@ -1639,14 +2062,31 @@ export async function updateAdminFixedExpense(id: string, payload: UpdateFixedEx
   return normalizeFixedExpense(data?.fixed_expense ?? data?.expense ?? data);
 }
 
-export async function getAdminVariableExpenses(startDate: string, endDate: string): Promise<VariableExpense[]> {
+export async function getAdminVariableExpenses(
+  startDate: string,
+  endDate: string,
+): Promise<VariableExpense[]> {
   const query = new URLSearchParams({ startDate, endDate }).toString();
-  const data = await apiRequest<any>(`/api/admin/expenses/variable?${query}`, { method: "GET" }, true);
-  const expenses = extractCollection(data, ["variableExpenses", "variable_expenses", "expenses", "items", "rows"]);
-  return expenses.map(normalizeVariableExpense).filter((expense) => expense.title.length > 0 || expense.amount > 0);
+  const data = await apiRequest<any>(
+    `/api/admin/expenses/variable?${query}`,
+    { method: "GET" },
+    true,
+  );
+  const expenses = extractCollection(data, [
+    "variableExpenses",
+    "variable_expenses",
+    "expenses",
+    "items",
+    "rows",
+  ]);
+  return expenses
+    .map(normalizeVariableExpense)
+    .filter((expense) => expense.title.length > 0 || expense.amount > 0);
 }
 
-export async function createAdminVariableExpense(payload: CreateVariableExpensePayload): Promise<VariableExpense> {
+export async function createAdminVariableExpense(
+  payload: CreateVariableExpensePayload,
+): Promise<VariableExpense> {
   const data = await apiRequest<any>(
     "/api/admin/expenses/variable",
     {
@@ -1656,17 +2096,30 @@ export async function createAdminVariableExpense(payload: CreateVariableExpenseP
     true,
   );
 
-  return normalizeVariableExpense(data?.variable_expense ?? data?.expense ?? data);
+  return normalizeVariableExpense(
+    data?.variable_expense ?? data?.expense ?? data,
+  );
 }
 
-export async function updateAdminVariableExpense(id: string, payload: UpdateVariableExpensePayload): Promise<VariableExpense> {
+export async function updateAdminVariableExpense(
+  id: string,
+  payload: UpdateVariableExpensePayload,
+): Promise<VariableExpense> {
   const safeId = String(id || "").trim();
   if (!safeId) {
-    throw new ApiClientError("ID do gasto variavel e obrigatorio.", 400, "VALIDATION_ERROR");
+    throw new ApiClientError(
+      "ID do gasto variavel e obrigatorio.",
+      400,
+      "VALIDATION_ERROR",
+    );
   }
 
   if (Object.keys(payload || {}).length === 0) {
-    throw new ApiClientError("Nenhum campo alterado para atualizar.", 400, "VALIDATION_ERROR");
+    throw new ApiClientError(
+      "Nenhum campo alterado para atualizar.",
+      400,
+      "VALIDATION_ERROR",
+    );
   }
 
   const data = await apiRequest<any>(
@@ -1678,7 +2131,9 @@ export async function updateAdminVariableExpense(id: string, payload: UpdateVari
     true,
   );
 
-  return normalizeVariableExpense(data?.variable_expense ?? data?.expense ?? data);
+  return normalizeVariableExpense(
+    data?.variable_expense ?? data?.expense ?? data,
+  );
 }
 
 export async function createPixPayment(input: {
@@ -1737,18 +2192,34 @@ export async function createPointPayment(input: {
   return normalizePointPaymentResponse(data);
 }
 
-export async function getPaymentStatus(reference: string): Promise<PaymentStatusResponse> {
-  const data = await apiRequest<any>(`/api/payments/status/${encodeURIComponent(reference)}`, { method: "GET" }, true);
+export async function getPaymentStatus(
+  reference: string,
+): Promise<PaymentStatusResponse> {
+  const data = await apiRequest<any>(
+    `/api/payments/status/${encodeURIComponent(reference)}`,
+    { method: "GET" },
+    true,
+  );
   return normalizePaymentStatusResponse(data);
 }
 
-export async function cancelPayment(reference: string): Promise<PaymentStatusResponse> {
+export async function cancelPayment(
+  reference: string,
+): Promise<PaymentStatusResponse> {
   try {
-    const data = await apiRequest<any>(`/api/payments/cancel/${encodeURIComponent(reference)}`, { method: "POST" }, true);
+    const data = await apiRequest<any>(
+      `/api/payments/cancel/${encodeURIComponent(reference)}`,
+      { method: "POST" },
+      true,
+    );
     return normalizePaymentStatusResponse(data);
   } catch (error) {
     if (error instanceof ApiClientError && error.status === 404) {
-      const data = await apiRequest<any>(`/api/payments/cancel/${encodeURIComponent(reference)}`, { method: "DELETE" }, true);
+      const data = await apiRequest<any>(
+        `/api/payments/cancel/${encodeURIComponent(reference)}`,
+        { method: "DELETE" },
+        true,
+      );
       return normalizePaymentStatusResponse(data);
     }
 
@@ -1756,11 +2227,17 @@ export async function cancelPayment(reference: string): Promise<PaymentStatusRes
   }
 }
 
-export async function createSubscriptionPlan(payload: SubscriptionPlanPayload): Promise<SubscriptionPlan> {
+export async function createSubscriptionPlan(
+  payload: SubscriptionPlanPayload,
+): Promise<SubscriptionPlan> {
   const safeName = String(payload.name || "").trim();
   const safeAmount = Number(payload.transaction_amount || 0);
   if (!safeName || !Number.isFinite(safeAmount) || safeAmount <= 0) {
-    throw new ApiClientError("Nome e valor do plano sao obrigatorios.", 400, "VALIDATION_ERROR");
+    throw new ApiClientError(
+      "Nome e valor do plano sao obrigatorios.",
+      400,
+      "VALIDATION_ERROR",
+    );
   }
 
   const modernBody = {
@@ -1788,7 +2265,9 @@ export async function createSubscriptionPlan(payload: SubscriptionPlanPayload): 
       true,
     );
 
-    return normalizeSubscriptionPlan(data?.plan ?? data?.subscription_plan ?? data);
+    return normalizeSubscriptionPlan(
+      data?.plan ?? data?.subscription_plan ?? data,
+    );
   } catch (error) {
     logApiDebug("Create plan failed (modern payload)", {
       status: error instanceof ApiClientError ? error.status : undefined,
@@ -1828,13 +2307,25 @@ export async function getAdminSubscribers(): Promise<AdminSubscriber[]> {
 
   for (const endpoint of candidateEndpoints) {
     try {
-      const data = await apiRequest<any>(`${endpoint}?_t=${Date.now()}`, { method: "GET" }, true);
-      const rows = extractCollection(data, ["subscribers", "subscriptions", "items", "rows"]);
+      const data = await apiRequest<any>(
+        `${endpoint}?_t=${Date.now()}`,
+        { method: "GET" },
+        true,
+      );
+      const rows = extractCollection(data, [
+        "subscribers",
+        "subscriptions",
+        "items",
+        "rows",
+      ]);
       return rows
         .map(normalizeAdminSubscriber)
         .filter((item) => item.userId.length > 0);
     } catch (error) {
-      if (error instanceof ApiClientError && (error.status === 404 || error.status === 405)) {
+      if (
+        error instanceof ApiClientError &&
+        (error.status === 404 || error.status === 405)
+      ) {
         lastError = error;
         continue;
       }
@@ -1850,10 +2341,17 @@ export async function getAdminSubscribers(): Promise<AdminSubscriber[]> {
   return [];
 }
 
-export async function toggleSubscriptionPlan(reference: string, isActive: boolean): Promise<SubscriptionPlan> {
+export async function toggleSubscriptionPlan(
+  reference: string,
+  isActive: boolean,
+): Promise<SubscriptionPlan> {
   const safeReference = String(reference || "").trim();
   if (!safeReference) {
-    throw new ApiClientError("Referencia do plano e obrigatoria.", 400, "VALIDATION_ERROR");
+    throw new ApiClientError(
+      "Referencia do plano e obrigatoria.",
+      400,
+      "VALIDATION_ERROR",
+    );
   }
 
   logApiDebug("Toggling subscription plan", {
@@ -1870,16 +2368,24 @@ export async function toggleSubscriptionPlan(reference: string, isActive: boolea
     true,
   );
 
-  return normalizeSubscriptionPlan(data?.plan ?? data?.subscription_plan ?? data);
+  return normalizeSubscriptionPlan(
+    data?.plan ?? data?.subscription_plan ?? data,
+  );
 }
 
-export async function createSubscription(payload: CreateSubscriptionPayload): Promise<SubscriptionInfo> {
+export async function createSubscription(
+  payload: CreateSubscriptionPayload,
+): Promise<SubscriptionInfo> {
   const safePlanId = String(payload.preapproval_plan_id || "").trim();
   const safeToken = String(payload.token || "").trim();
   const safeEmail = String(payload.email || "").trim();
 
   if (!safePlanId || !safeToken || !safeEmail) {
-    throw new ApiClientError("Plano, token e email sao obrigatorios.", 400, "VALIDATION_ERROR");
+    throw new ApiClientError(
+      "Plano, token e email sao obrigatorios.",
+      400,
+      "VALIDATION_ERROR",
+    );
   }
 
   const data = await apiRequest<any>(
@@ -1898,7 +2404,9 @@ export async function createSubscription(payload: CreateSubscriptionPayload): Pr
   return normalizeSubscriptionInfo(data);
 }
 
-export async function getPublicSubscriptionPlans(): Promise<SubscriptionPlan[]> {
+export async function getPublicSubscriptionPlans(): Promise<
+  SubscriptionPlan[]
+> {
   const data = await apiRequest<any>(
     `/api/payments/subscriptions/plans/public?_t=${Date.now()}`,
     { method: "GET" },
@@ -1911,10 +2419,16 @@ export async function getPublicSubscriptionPlans(): Promise<SubscriptionPlan[]> 
     .filter((plan) => Boolean(plan.preapprovalPlanId || plan.id));
 }
 
-export async function getSubscription(reference: string): Promise<SubscriptionInfo> {
+export async function getSubscription(
+  reference: string,
+): Promise<SubscriptionInfo> {
   const safeReference = String(reference || "").trim();
   if (!safeReference) {
-    throw new ApiClientError("Referencia da assinatura e obrigatoria.", 400, "VALIDATION_ERROR");
+    throw new ApiClientError(
+      "Referencia da assinatura e obrigatoria.",
+      400,
+      "VALIDATION_ERROR",
+    );
   }
 
   const data = await apiRequest<any>(
@@ -1934,14 +2448,24 @@ export async function getMySubscription(): Promise<SubscriptionInfo | null> {
 
   for (const endpoint of candidateEndpoints) {
     try {
-      const data = await apiRequest<any>(`${endpoint}?_t=${Date.now()}`, { method: "GET" }, true);
+      const data = await apiRequest<any>(
+        `${endpoint}?_t=${Date.now()}`,
+        { method: "GET" },
+        true,
+      );
       return normalizeSubscriptionInfo(data);
     } catch (error) {
-      if (error instanceof ApiClientError && (error.status === 404 || error.status === 405)) {
+      if (
+        error instanceof ApiClientError &&
+        (error.status === 404 || error.status === 405)
+      ) {
         continue;
       }
 
-      if (error instanceof ApiClientError && error.code === "SUBSCRIPTION_NOT_FOUND") {
+      if (
+        error instanceof ApiClientError &&
+        error.code === "SUBSCRIPTION_NOT_FOUND"
+      ) {
         return null;
       }
 
@@ -1952,10 +2476,16 @@ export async function getMySubscription(): Promise<SubscriptionInfo | null> {
   return null;
 }
 
-export async function cancelSubscription(reference: string): Promise<SubscriptionInfo> {
+export async function cancelSubscription(
+  reference: string,
+): Promise<SubscriptionInfo> {
   const safeReference = String(reference || "").trim();
   if (!safeReference) {
-    throw new ApiClientError("Referencia da assinatura e obrigatoria.", 400, "VALIDATION_ERROR");
+    throw new ApiClientError(
+      "Referencia da assinatura e obrigatoria.",
+      400,
+      "VALIDATION_ERROR",
+    );
   }
 
   const data = await apiRequest<any>(
@@ -1998,7 +2528,9 @@ function normalizeSiteLanguage(raw: any): SiteLanguage {
     id: String(raw?.id ?? raw?._id ?? raw?.code ?? ""),
     code: String(raw?.code ?? "").toLowerCase(),
     name: String(raw?.name ?? ""),
-    countryCode: String(raw?.country_code ?? raw?.countryCode ?? "").toUpperCase(),
+    countryCode: String(
+      raw?.country_code ?? raw?.countryCode ?? "",
+    ).toUpperCase(),
     flag: String(raw?.flag ?? ""),
     enabled: Boolean(raw?.enabled ?? raw?.is_enabled ?? raw?.isEnabled ?? true),
     createdAt: raw?.created_at ?? raw?.createdAt ?? undefined,
@@ -2008,14 +2540,20 @@ function normalizeSiteLanguage(raw: any): SiteLanguage {
 
 function normalizeLanguageCatalogOption(raw: any): LanguageCatalogOption {
   return {
-    code: String(raw?.code ?? raw?.language_code ?? "").trim().toLowerCase(),
+    code: String(raw?.code ?? raw?.language_code ?? "")
+      .trim()
+      .toLowerCase(),
     name: String(raw?.name ?? raw?.language_name ?? "").trim(),
-    countryCode: String(raw?.country_code ?? raw?.countryCode ?? "").trim().toUpperCase(),
+    countryCode: String(raw?.country_code ?? raw?.countryCode ?? "")
+      .trim()
+      .toUpperCase(),
     flag: String(raw?.flag ?? "").trim(),
   };
 }
 
-export async function getLanguageCatalogOptions(): Promise<LanguageCatalogOption[]> {
+export async function getLanguageCatalogOptions(): Promise<
+  LanguageCatalogOption[]
+> {
   const candidateEndpoints = [
     `/api/languages/catalog?_t=${Date.now()}`,
     `/api/languages/options?_t=${Date.now()}`,
@@ -2026,17 +2564,30 @@ export async function getLanguageCatalogOptions(): Promise<LanguageCatalogOption
   for (const endpoint of candidateEndpoints) {
     try {
       const data = await apiRequest<any>(endpoint, { method: "GET" }, false);
-      const items = extractCollection<any>(data, ["languages", "items", "data", "catalog"]);
+      const items = extractCollection<any>(data, [
+        "languages",
+        "items",
+        "data",
+        "catalog",
+      ]);
 
       const normalized = items
         .map(normalizeLanguageCatalogOption)
-        .filter((item) => Boolean(item.code) && Boolean(item.name) && Boolean(item.countryCode));
+        .filter(
+          (item) =>
+            Boolean(item.code) &&
+            Boolean(item.name) &&
+            Boolean(item.countryCode),
+        );
 
       if (normalized.length > 0) {
         return normalized;
       }
     } catch (error) {
-      if (error instanceof ApiClientError && (error.status === 404 || error.status === 405)) {
+      if (
+        error instanceof ApiClientError &&
+        (error.status === 404 || error.status === 405)
+      ) {
         continue;
       }
       throw error;
@@ -2047,22 +2598,41 @@ export async function getLanguageCatalogOptions(): Promise<LanguageCatalogOption
 }
 
 export async function getSiteLanguages(): Promise<SiteLanguage[]> {
-  const data = await apiRequest<any>(`/api/languages?_t=${Date.now()}`, { method: "GET" }, false);
+  const data = await apiRequest<any>(
+    `/api/languages?_t=${Date.now()}`,
+    { method: "GET" },
+    false,
+  );
   const items = extractCollection<any>(data, ["languages", "items", "data"]);
 
   return items
     .map(normalizeSiteLanguage)
-    .filter((language) => Boolean(language.code) && Boolean(language.name) && Boolean(language.countryCode));
+    .filter(
+      (language) =>
+        Boolean(language.code) &&
+        Boolean(language.name) &&
+        Boolean(language.countryCode),
+    );
 }
 
-export async function createAdminSiteLanguage(payload: CreateSiteLanguagePayload): Promise<SiteLanguage> {
-  const safeCode = String(payload.code || "").trim().toLowerCase();
+export async function createAdminSiteLanguage(
+  payload: CreateSiteLanguagePayload,
+): Promise<SiteLanguage> {
+  const safeCode = String(payload.code || "")
+    .trim()
+    .toLowerCase();
   const safeName = String(payload.name || "").trim();
-  const safeCountryCode = String(payload.countryCode || "").trim().toUpperCase();
+  const safeCountryCode = String(payload.countryCode || "")
+    .trim()
+    .toUpperCase();
   const safeFlag = String(payload.flag || "").trim();
 
   if (!safeCode || !safeName || !safeCountryCode) {
-    throw new ApiClientError("Codigo, nome e pais da lingua sao obrigatorios.", 400, "VALIDATION_ERROR");
+    throw new ApiClientError(
+      "Codigo, nome e pais da lingua sao obrigatorios.",
+      400,
+      "VALIDATION_ERROR",
+    );
   }
 
   const data = await apiRequest<any>(
@@ -2081,4 +2651,21 @@ export async function createAdminSiteLanguage(payload: CreateSiteLanguagePayload
   );
 
   return normalizeSiteLanguage(data);
+}
+
+export async function fetchI18nByCode(
+  code: string,
+): Promise<Record<string, string>> {
+  const safeCode = String(code || "")
+    .trim()
+    .toLowerCase();
+  const data = await apiRequest<Record<string, string>>(
+    `/api/i18n/${encodeURIComponent(safeCode)}`,
+    { method: "GET" },
+    false,
+  );
+  if (data && typeof data === "object" && !Array.isArray(data)) {
+    return data as Record<string, string>;
+  }
+  return {};
 }

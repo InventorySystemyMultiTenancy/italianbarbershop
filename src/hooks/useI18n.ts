@@ -1,9 +1,11 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import type { TranslationEntries, Translations } from "@/lib/i18n";
-import { t as translateText, translateEntries } from "@/lib/i18n";
+import { t as translateText } from "@/lib/i18n";
+import { fetchI18nByCode } from "@/lib/api";
 
 interface UseI18nOptions {
   entries: TranslationEntries;
+  fallbackEntries?: TranslationEntries;
   defaultLanguage?: string;
   provider?: string;
   debounceMs?: number;
@@ -47,23 +49,21 @@ function readStoredLanguage(defaultLanguage: string) {
 }
 
 export function useI18n(options: UseI18nOptions): UseI18nResult {
-  const {
-    entries,
-    defaultLanguage = "pt",
-    provider = import.meta.env.VITE_TRANSLATION_PROVIDER || "libretranslate",
-    debounceMs = 300,
-  } = options;
+  const { entries, fallbackEntries, defaultLanguage = "pt" } = options;
 
-  const [currentLanguage, setCurrentLanguage] = useState(() => readStoredLanguage(defaultLanguage));
+  const [currentLanguage, setCurrentLanguage] = useState(() =>
+    readStoredLanguage(defaultLanguage),
+  );
   const [translations, setTranslations] = useState<Translations>({});
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  const debounceTimerRef = useRef<number | null>(null);
   const requestIdRef = useRef(0);
 
   const setLanguage = useCallback((langCode: string) => {
-    const safe = String(langCode || "").trim().toLowerCase();
+    const safe = String(langCode || "")
+      .trim()
+      .toLowerCase();
     if (!safe) return;
     setCurrentLanguage(safe);
   }, []);
@@ -73,18 +73,23 @@ export function useI18n(options: UseI18nOptions): UseI18nResult {
   }, [currentLanguage]);
 
   useEffect(() => {
-    if (debounceTimerRef.current) {
-      window.clearTimeout(debounceTimerRef.current);
-      debounceTimerRef.current = null;
-    }
-
+    // Portuguese: use local entries directly, no network call needed
     if (currentLanguage === "pt") {
-      setTranslations({});
+      setTranslations(entries);
       setLoading(false);
       setError(null);
       return;
     }
 
+    // Italian: use local fallback entries directly when available
+    if (currentLanguage === "it" && fallbackEntries) {
+      setTranslations(fallbackEntries);
+      setLoading(false);
+      setError(null);
+      return;
+    }
+
+    // Other languages: check localStorage cache first
     const cached = readCachedTranslations(currentLanguage);
     if (cached) {
       setTranslations(cached);
@@ -93,39 +98,36 @@ export function useI18n(options: UseI18nOptions): UseI18nResult {
       return;
     }
 
+    // Fetch from DB
     setLoading(true);
     setError(null);
 
     const requestId = ++requestIdRef.current;
-    debounceTimerRef.current = window.setTimeout(() => {
-      void translateEntries(currentLanguage, entries, provider)
-        .then((nextTranslations) => {
-          if (requestIdRef.current !== requestId) return;
-          setTranslations(nextTranslations || {});
-          writeCachedTranslations(currentLanguage, nextTranslations || {});
-          setError(null);
-        })
-        .catch((translateError) => {
-          if (requestIdRef.current !== requestId) return;
-          setTranslations({});
-          setError(translateError instanceof Error ? translateError.message : "Falha ao traduzir interface.");
-        })
-        .finally(() => {
-          if (requestIdRef.current !== requestId) return;
-          setLoading(false);
-        });
-    }, debounceMs);
 
-    return () => {
-      if (debounceTimerRef.current) {
-        window.clearTimeout(debounceTimerRef.current);
-        debounceTimerRef.current = null;
-      }
-    };
-  }, [currentLanguage, entries, provider, debounceMs]);
+    void fetchI18nByCode(currentLanguage)
+      .then((fetched) => {
+        if (requestIdRef.current !== requestId) return;
+        setTranslations(fetched);
+        writeCachedTranslations(currentLanguage, fetched);
+        setError(null);
+      })
+      .catch((err) => {
+        if (requestIdRef.current !== requestId) return;
+        // Fallback to Italian when backend is down
+        setTranslations(fallbackEntries ?? entries);
+        setError(
+          err instanceof Error ? err.message : "Falha ao carregar traducoes.",
+        );
+      })
+      .finally(() => {
+        if (requestIdRef.current !== requestId) return;
+        setLoading(false);
+      });
+  }, [currentLanguage, entries, fallbackEntries]);
 
   const t = useCallback(
-    (key: string, fallback: string) => translateText(translations, key, fallback),
+    (key: string, fallback: string) =>
+      translateText(translations, key, fallback),
     [translations],
   );
 
