@@ -1,7 +1,13 @@
 import { createContext, useContext, useEffect, useMemo, useState } from "react";
 import type { ReactNode } from "react";
 import type { Locale } from "date-fns";
-import { arSA, it as itLocale, ptBR } from "date-fns/locale";
+import {
+  arSA,
+  it as itLocale,
+  ptBR,
+  enGB,
+  es as esLocale,
+} from "date-fns/locale";
 import {
   createAdminSiteLanguage,
   getSiteLanguages,
@@ -12,6 +18,8 @@ import { useI18n } from "@/hooks/useI18n";
 import {
   UI_TRANSLATION_ENTRIES_PT,
   UI_TRANSLATION_ENTRIES_IT,
+  UI_TRANSLATION_ENTRIES_EN,
+  UI_TRANSLATION_ENTRIES_ES,
 } from "@/lib/i18nEntries";
 import type { Translations } from "@/lib/i18n";
 
@@ -166,6 +174,12 @@ export function LanguageProvider({ children }: { children: ReactNode }) {
     entries: UI_TRANSLATION_ENTRIES_PT,
     fallbackEntries: UI_TRANSLATION_ENTRIES_IT,
     defaultLanguage: "pt",
+    staticLanguages: {
+      pt: UI_TRANSLATION_ENTRIES_PT,
+      it: UI_TRANSLATION_ENTRIES_IT,
+      en: UI_TRANSLATION_ENTRIES_EN,
+      es: UI_TRANSLATION_ENTRIES_ES,
+    },
   });
 
   const reloadLanguages = async () => {
@@ -240,14 +254,26 @@ export function LanguageProvider({ children }: { children: ReactNode }) {
   const value = useMemo<LanguageContextType>(() => {
     const safeLanguage = currentLanguage.toLowerCase();
     const dateFnsLocale =
-      safeLanguage === "ma" ? arSA : safeLanguage === "it" ? itLocale : ptBR;
+      safeLanguage === "ma"
+        ? arSA
+        : safeLanguage === "it"
+          ? itLocale
+          : safeLanguage === "en"
+            ? enGB
+            : safeLanguage === "es"
+              ? esLocale
+              : ptBR;
 
     const currencyLocale =
       safeLanguage === "ma"
         ? "ar-MA"
         : safeLanguage === "it"
           ? "it-IT"
-          : "pt-BR";
+          : safeLanguage === "en"
+            ? "en-GB"
+            : safeLanguage === "es"
+              ? "es-ES"
+              : "pt-BR";
 
     return {
       language: currentLanguage,

@@ -9,6 +9,7 @@ interface UseI18nOptions {
   defaultLanguage?: string;
   provider?: string;
   debounceMs?: number;
+  staticLanguages?: Record<string, TranslationEntries>;
 }
 
 interface UseI18nResult {
@@ -21,7 +22,7 @@ interface UseI18nResult {
 }
 
 const LANGUAGE_STORAGE_KEY = "app_language";
-const CACHE_PREFIX = "app_i18n_cache_";
+const CACHE_PREFIX = "app_i18n_cache_v2_";
 
 function getCacheKey(language: string) {
   return `${CACHE_PREFIX}${language}`;
@@ -49,7 +50,12 @@ function readStoredLanguage(defaultLanguage: string) {
 }
 
 export function useI18n(options: UseI18nOptions): UseI18nResult {
-  const { entries, fallbackEntries, defaultLanguage = "pt" } = options;
+  const {
+    entries,
+    fallbackEntries,
+    defaultLanguage = "pt",
+    staticLanguages,
+  } = options;
 
   const [currentLanguage, setCurrentLanguage] = useState(() =>
     readStoredLanguage(defaultLanguage),
@@ -73,6 +79,14 @@ export function useI18n(options: UseI18nOptions): UseI18nResult {
   }, [currentLanguage]);
 
   useEffect(() => {
+    // Static languages: use local entries directly, no network call needed
+    if (staticLanguages?.[currentLanguage]) {
+      setTranslations(staticLanguages[currentLanguage]);
+      setLoading(false);
+      setError(null);
+      return;
+    }
+
     // Portuguese: use local entries directly, no network call needed
     if (currentLanguage === "pt") {
       setTranslations(entries);
