@@ -55,13 +55,20 @@ function normalizeServiceToken(value?: string) {
     .replace(/[^a-z0-9]/g, "");
 }
 
-function serviceMatchesDiscount(selectedKey?: string, discountServiceType?: string) {
+function serviceMatchesDiscount(
+  selectedKey?: string,
+  discountServiceType?: string,
+) {
   const selected = normalizeServiceToken(selectedKey);
   const discountType = normalizeServiceToken(discountServiceType);
 
   if (!selected) return false;
   if (!discountType) return true;
-  return selected === discountType || selected.includes(discountType) || discountType.includes(selected);
+  return (
+    selected === discountType ||
+    selected.includes(discountType) ||
+    discountType.includes(selected)
+  );
 }
 
 function isBirthdayToday(dateText?: string) {
@@ -89,96 +96,17 @@ function logBookingDebug(step: string, payload: Record<string, unknown>) {
 
 const Booking = () => {
   const { user, birthdayDiscount, loading: authLoading } = useAuth();
-  const { language, dateFnsLocale, currencyLocale } = useLanguage();
+  const { language, dateFnsLocale, currencyLocale, t } = useLanguage();
   const navigate = useNavigate();
-  const text = language === "ma"
-    ? {
-        expiredTitle: "Session salat",
-        expiredDesc: "3awed dkhol bach tkemmel.",
-        authLoading: "Kayt7emmel l2auth...",
-        titleA: "HJZ",
-        titleB: "LWA9T",
-        subtitle: "Khtar nhar w lwa9t dyal l9assa dyalek",
-        windowPrefix: "L7jz mota7 men",
-        windowMiddle: "7tta",
-        birthdayPromoActive: "Promo dyal 3id lmilad khdama",
-        birthdayPromoFallback: "3endek tkhfida dyal 3id lmilad f service li kayt2ahal.",
-        discountLabel: "Tkhfida",
-        chooseService: "Khtar service",
-        loadingServices: "Kayt7emmlu services...",
-        noServices: "Ma kayn 7tta service f cataloge.",
-        birthdayOffSuffix: "OFF 3id lmilad",
-        chooseBarber: "Khtar l7ella9",
-        loadingBarbers: "Kayt7emmlu l7ella9a...",
-        retry: "3awed",
-        noBarbers: "Ma kayn 7tta 7ella9 mssajel.",
-        noPhoto: "Bla tswira",
-        chooseDay: "Khtar nhar",
-        availableTimes: "Lwa9t mota7",
-        selectBarber: "Khtar 7ella9.",
-        loadingSlots: "Kayt7emmlu lwa9t...",
-        noSlots: "Ma kayn 7tta wa9t f had tarikh.",
-        slotPaid: "Mkhalles",
-        slotScheduled: "M7juz",
-        slotDisabled: "M3attel",
-        slotAvailable: "Mota7",
-        barberLabel: "L7ella9",
-        birthdayWillApply: "Tkhfida dyal 3id lmilad ghadi ttb9a f had service.",
-        birthdayApplied: "Ttb9at tkhfida dyal 3id lmilad",
-        originalPrice: "Taman l2asli",
-        finalPrice: "Taman l2akhiri",
-        paymentMethod: "Tari9at lkhlaas",
-        inPersonPayment: "Lkhlaas presencial f l7anout",
-        booking: "Kan7jzo...",
-        confirmBooking: "2AKKID L7JZ",
-      }
-    : {
-        expiredTitle: "Sessione scaduta",
-        expiredDesc: "Accedi di nuovo per continuare.",
-        authLoading: "Caricamento autenticazione...",
-        titleA: "PRENOTA",
-        titleB: "ORARIO",
-        subtitle: "Scegli giorno e orario del tuo taglio",
-        windowPrefix: "Prenotazioni disponibili da",
-        windowMiddle: "a",
-        birthdayPromoActive: "Promo compleanno attiva",
-        birthdayPromoFallback: "Hai uno sconto compleanno sul servizio idoneo.",
-        discountLabel: "Sconto",
-        chooseService: "Scegli il servizio",
-        loadingServices: "Caricamento servizi...",
-        noServices: "Nessun servizio disponibile nel catalogo.",
-        birthdayOffSuffix: "OFF compleanno",
-        chooseBarber: "Scegli il barbiere",
-        loadingBarbers: "Caricamento barbieri...",
-        retry: "Riprova",
-        noBarbers: "Nessun barbiere registrato.",
-        noPhoto: "Senza foto",
-        chooseDay: "Scegli il giorno",
-        availableTimes: "Orari disponibili",
-        selectBarber: "Seleziona un barbiere.",
-        loadingSlots: "Caricamento orari...",
-        noSlots: "Nessun orario disponibile per questa data.",
-        slotPaid: "Pagato",
-        slotScheduled: "Prenotato",
-        slotDisabled: "Disabilitato",
-        slotAvailable: "Disponibile",
-        barberLabel: "Barbiere",
-        birthdayWillApply: "Lo sconto compleanno verra applicato a questo servizio.",
-        birthdayApplied: "Sconto compleanno applicato",
-        originalPrice: "Prezzo originale",
-        finalPrice: "Prezzo finale",
-        paymentMethod: "Metodo di pagamento",
-        inPersonPayment: "Pagamento in presenza in barberia",
-        booking: "Prenotazione...",
-        confirmBooking: "CONFERMA PRENOTAZIONE",
-      };
   const defaultWindow = getDefaultBookingWindow();
   const [selectedDate, setSelectedDate] = useState<string>(defaultWindow.start);
   const [selectedTime, setSelectedTime] = useState<string>("");
   const [slots, setSlots] = useState<AppointmentSlot[]>([]);
   const [slotsError, setSlotsError] = useState<string | null>(null);
   const [slotsMeta, setSlotsMeta] = useState<SlotsMeta>({});
-  const [bookingWindowStart, setBookingWindowStart] = useState(defaultWindow.start);
+  const [bookingWindowStart, setBookingWindowStart] = useState(
+    defaultWindow.start,
+  );
   const [bookingWindowEnd, setBookingWindowEnd] = useState(defaultWindow.end);
   const [slotsLoading, setSlotsLoading] = useState(false);
   const [submitting, setSubmitting] = useState(false);
@@ -201,20 +129,22 @@ const Booking = () => {
     if (!authLoading && !user) navigate("/login");
   }, [user, authLoading, navigate]);
 
-  const availableDates = useMemo(
-    () => {
-      const start = parseLocalDate(bookingWindowStart);
-      const end = parseLocalDate(bookingWindowEnd);
+  const availableDates = useMemo(() => {
+    const start = parseLocalDate(bookingWindowStart);
+    const end = parseLocalDate(bookingWindowEnd);
 
-      if (Number.isNaN(start.getTime()) || Number.isNaN(end.getTime()) || end < start) {
-        return [] as Date[];
-      }
+    if (
+      Number.isNaN(start.getTime()) ||
+      Number.isNaN(end.getTime()) ||
+      end < start
+    ) {
+      return [] as Date[];
+    }
 
-      const days = Math.floor((end.getTime() - start.getTime()) / (24 * 60 * 60 * 1000)) + 1;
-      return Array.from({ length: days }, (_, i) => addDays(start, i));
-    },
-    [bookingWindowStart, bookingWindowEnd],
-  );
+    const days =
+      Math.floor((end.getTime() - start.getTime()) / (24 * 60 * 60 * 1000)) + 1;
+    return Array.from({ length: days }, (_, i) => addDays(start, i));
+  }, [bookingWindowStart, bookingWindowEnd]);
 
   const loadSlots = async (date: string) => {
     setSlotsLoading(true);
@@ -245,7 +175,8 @@ const Booking = () => {
       setSlots(response.slots);
       setSlotsMeta(response.meta || {});
 
-      const nextWindowStart = response.meta?.bookingWindowStart || bookingWindowStart;
+      const nextWindowStart =
+        response.meta?.bookingWindowStart || bookingWindowStart;
       const nextWindowEnd = response.meta?.bookingWindowEnd || bookingWindowEnd;
       setBookingWindowStart(nextWindowStart);
       setBookingWindowEnd(nextWindowEnd);
@@ -258,8 +189,11 @@ const Booking = () => {
     } catch (error) {
       if (error instanceof ApiClientError && error.status === 401) {
         toast({
-          title: text.expiredTitle,
-          description: text.expiredDesc,
+          title: t("booking_expired_title", "Sessione scaduta"),
+          description: t(
+            "booking_expired_desc",
+            "Accedi di nuovo per continuare.",
+          ),
           variant: "destructive",
         });
         navigate("/login");
@@ -278,9 +212,10 @@ const Booking = () => {
       setSlotsMeta({});
       toast({
         title: "Falha ao carregar horarios",
-        description: error instanceof ApiClientError && error.status === 500
-          ? "Erro interno do servidor. Use Tentar novamente."
-          : getFriendlyErrorMessage(error),
+        description:
+          error instanceof ApiClientError && error.status === 500
+            ? "Erro interno do servidor. Use Tentar novamente."
+            : getFriendlyErrorMessage(error),
         variant: "destructive",
       });
     } finally {
@@ -294,14 +229,20 @@ const Booking = () => {
       const catalog = await getAppointmentServices();
       setServices(catalog);
 
-      if (selectedServiceKey && !catalog.some((service) => service.key === selectedServiceKey)) {
+      if (
+        selectedServiceKey &&
+        !catalog.some((service) => service.key === selectedServiceKey)
+      ) {
         setSelectedServiceKey("");
       }
     } catch (error) {
       if (error instanceof ApiClientError && error.status === 401) {
         toast({
-          title: text.expiredTitle,
-          description: text.expiredDesc,
+          title: t("booking_expired_title", "Sessione scaduta"),
+          description: t(
+            "booking_expired_desc",
+            "Accedi di nuovo per continuare.",
+          ),
           variant: "destructive",
         });
         navigate("/login");
@@ -312,9 +253,10 @@ const Booking = () => {
       setSelectedServiceKey("");
       toast({
         title: "Falha ao carregar servicos",
-        description: error instanceof ApiClientError && error.status === 500
-          ? "Erro interno do servidor. Tente novamente."
-          : getFriendlyErrorMessage(error),
+        description:
+          error instanceof ApiClientError && error.status === 500
+            ? "Erro interno do servidor. Tente novamente."
+            : getFriendlyErrorMessage(error),
         variant: "destructive",
       });
     } finally {
@@ -330,7 +272,9 @@ const Booking = () => {
       const data = await getBarbers(true);
       setBarbers(data);
 
-      const hasSelected = data.some((barber) => barber.id === selectedBarberId && barber.isActive);
+      const hasSelected = data.some(
+        (barber) => barber.id === selectedBarberId && barber.isActive,
+      );
       if (!hasSelected) {
         const firstActive = data.find((barber) => barber.isActive);
         setSelectedBarberId(firstActive?.id || "");
@@ -338,8 +282,11 @@ const Booking = () => {
     } catch (error) {
       if (error instanceof ApiClientError && error.status === 401) {
         toast({
-          title: text.expiredTitle,
-          description: text.expiredDesc,
+          title: t("booking_expired_title", "Sessione scaduta"),
+          description: t(
+            "booking_expired_desc",
+            "Accedi di nuovo per continuare.",
+          ),
           variant: "destructive",
         });
         navigate("/login");
@@ -357,7 +304,9 @@ const Booking = () => {
   useEffect(() => {
     if (!selectedDate || !user) return;
 
-    if (!isDateWithinWindow(selectedDate, bookingWindowStart, bookingWindowEnd)) {
+    if (
+      !isDateWithinWindow(selectedDate, bookingWindowStart, bookingWindowEnd)
+    ) {
       setSelectedDate(bookingWindowStart);
       return;
     }
@@ -371,7 +320,13 @@ const Booking = () => {
     }
 
     loadSlots(selectedDate);
-  }, [selectedDate, user, bookingWindowStart, bookingWindowEnd, selectedBarberId]);
+  }, [
+    selectedDate,
+    user,
+    bookingWindowStart,
+    bookingWindowEnd,
+    selectedBarberId,
+  ]);
 
   useEffect(() => {
     if (!user) return;
@@ -379,12 +334,18 @@ const Booking = () => {
     loadBarbers();
   }, [user]);
 
-  const selectedService = services.find((service) => service.key === selectedServiceKey) || null;
-  const selectedBarber = barbers.find((barber) => barber.id === selectedBarberId) || null;
-  const birthdayPercent = birthdayDiscount.discountPercent && birthdayDiscount.discountPercent > 0 ? birthdayDiscount.discountPercent : 50;
+  const selectedService =
+    services.find((service) => service.key === selectedServiceKey) || null;
+  const selectedBarber =
+    barbers.find((barber) => barber.id === selectedBarberId) || null;
+  const birthdayPercent =
+    birthdayDiscount.discountPercent && birthdayDiscount.discountPercent > 0
+      ? birthdayDiscount.discountPercent
+      : 50;
   const birthdayEligibleToday = isBirthdayToday(user?.birthDate);
   const hasBirthdayPromoGlobally = Boolean(
-    birthdayDiscount.active || ((birthdayDiscount.discountPercent ?? 0) > 0 && birthdayEligibleToday),
+    birthdayDiscount.active ||
+    ((birthdayDiscount.discountPercent ?? 0) > 0 && birthdayEligibleToday),
   );
   const hasBirthdayDiscountForSelectedService =
     hasBirthdayPromoGlobally &&
@@ -397,8 +358,14 @@ const Booking = () => {
   };
 
   const getAppointmentSummary = (appointment: Appointment) => {
-    const serviceLabel = appointment.serviceLabel || selectedService?.label || selectedServiceKey || "Servico";
-    const servicePrice = Number.isFinite(appointment.price) ? appointment.price : (selectedService?.price ?? 0);
+    const serviceLabel =
+      appointment.serviceLabel ||
+      selectedService?.label ||
+      selectedServiceKey ||
+      "Servico";
+    const servicePrice = Number.isFinite(appointment.price)
+      ? appointment.price
+      : (selectedService?.price ?? 0);
     const dateValue = appointment.appointmentDate || selectedDate;
     const timeValue = appointment.appointmentTime || selectedTime;
 
@@ -411,16 +378,24 @@ const Booking = () => {
   };
 
   const handleBook = async () => {
-    if (!selectedServiceKey || !selectedBarberId || !selectedDate || !selectedTime) {
+    if (
+      !selectedServiceKey ||
+      !selectedBarberId ||
+      !selectedDate ||
+      !selectedTime
+    ) {
       toast({
         title: "Preencha os campos obrigatorios",
-        description: "Selecione servico, barbeiro, data e horario para continuar.",
+        description:
+          "Selecione servico, barbeiro, data e horario para continuar.",
         variant: "destructive",
       });
       return;
     }
 
-    if (!isDateWithinWindow(selectedDate, bookingWindowStart, bookingWindowEnd)) {
+    if (
+      !isDateWithinWindow(selectedDate, bookingWindowStart, bookingWindowEnd)
+    ) {
       toast({
         title: "Data fora da janela de agendamento",
         description: `Escolha uma data entre ${bookingWindowStart} e ${bookingWindowEnd}.`,
@@ -441,12 +416,17 @@ const Booking = () => {
 
     setSubmitting(true);
     try {
-      const latestByBarber = await getSlotsByDate(selectedDate, selectedBarberId);
+      const latestByBarber = await getSlotsByDate(
+        selectedDate,
+        selectedBarberId,
+      );
       setSlots(latestByBarber.slots);
       setSlotsMeta(latestByBarber.meta || {});
 
-      const nextWindowStart = latestByBarber.meta?.bookingWindowStart || bookingWindowStart;
-      const nextWindowEnd = latestByBarber.meta?.bookingWindowEnd || bookingWindowEnd;
+      const nextWindowStart =
+        latestByBarber.meta?.bookingWindowStart || bookingWindowStart;
+      const nextWindowEnd =
+        latestByBarber.meta?.bookingWindowEnd || bookingWindowEnd;
       setBookingWindowStart(nextWindowStart);
       setBookingWindowEnd(nextWindowEnd);
 
@@ -466,15 +446,20 @@ const Booking = () => {
         selectedTime,
         selectedBarberId,
         totalSlots: latestByBarber.slots.length,
-        selectedSlot: latestByBarber.slots.find((slot) => slot.time === selectedTime) || null,
+        selectedSlot:
+          latestByBarber.slots.find((slot) => slot.time === selectedTime) ||
+          null,
       });
 
-      const selectedSlot = latestByBarber.slots.find((slot) => slot.time === selectedTime);
+      const selectedSlot = latestByBarber.slots.find(
+        (slot) => slot.time === selectedTime,
+      );
       if (!selectedSlot || selectedSlot.status !== "disponivel") {
         setSelectedTime("");
         toast({
           title: "Horario nao disponivel",
-          description: "Atualizamos os horarios em tempo real. Escolha outro horario disponivel.",
+          description:
+            "Atualizamos os horarios em tempo real. Escolha outro horario disponivel.",
           variant: "destructive",
         });
         return;
@@ -522,7 +507,9 @@ const Booking = () => {
 
         toast({
           title: "Desconto de aniversario aplicado",
-          description: discount.message || `${text.originalPrice} ${formatMoney(discount.basePrice || summary.servicePrice, currencyLocale)} • ${text.finalPrice} ${formatMoney(discount.finalPrice || summary.servicePrice, currencyLocale)}`,
+          description:
+            discount.message ||
+            `${t("booking_original_price", "Prezzo originale")} ${formatMoney(discount.basePrice || summary.servicePrice, currencyLocale)} • ${t("booking_final_price", "Prezzo finale")} ${formatMoney(discount.finalPrice || summary.servicePrice, currencyLocale)}`,
         });
       } else {
         if (hasBirthdayDiscountForSelectedService && selectedService) {
@@ -546,11 +533,15 @@ const Booking = () => {
         `Serviço: ${summary.serviceLabel}`,
       ].join("\n");
 
-      const openedWhatsApp = openWhatsAppMessage(bookingWhatsAppMessage, BUSINESS_WHATSAPP_NUMBER || undefined);
+      const openedWhatsApp = openWhatsAppMessage(
+        bookingWhatsAppMessage,
+        BUSINESS_WHATSAPP_NUMBER || undefined,
+      );
       if (!openedWhatsApp) {
         toast({
           title: "Nao foi possivel abrir o WhatsApp automaticamente",
-          description: "Verifique se o navegador bloqueou pop-up e tente novamente.",
+          description:
+            "Verifique se o navegador bloqueou pop-up e tente novamente.",
           variant: "destructive",
         });
       }
@@ -577,32 +568,41 @@ const Booking = () => {
 
       if (error instanceof ApiClientError && error.status === 401) {
         toast({
-          title: text.expiredTitle,
-          description: text.expiredDesc,
+          title: t("booking_expired_title", "Sessione scaduta"),
+          description: t("booking_expired_desc", "Accedi di nuovo per continuare."),
           variant: "destructive",
         });
         navigate("/login");
         return;
       }
 
-      if (error instanceof ApiClientError && (error.status === 409 || error.code === "SLOT_ALREADY_BOOKED")) {
+      if (
+        error instanceof ApiClientError &&
+        (error.status === 409 || error.code === "SLOT_ALREADY_BOOKED")
+      ) {
         setSelectedTime("");
         await loadSlots(selectedDate);
 
         toast({
           title: "Horario indisponivel",
-          description: "Este horario acabou de ser reservado. Escolha outro horario.",
+          description:
+            "Este horario acabou de ser reservado. Escolha outro horario.",
           variant: "destructive",
         });
         return;
       }
 
-      if (error instanceof ApiClientError && error.status === 400 && error.code === "INVALID_SERVICE_TYPE") {
+      if (
+        error instanceof ApiClientError &&
+        error.status === 400 &&
+        error.code === "INVALID_SERVICE_TYPE"
+      ) {
         setSelectedServiceKey("");
         await loadServices();
         toast({
           title: "Servico invalido",
-          description: "O servico selecionado nao e mais valido. Recarregamos o catalogo para voce selecionar novamente.",
+          description:
+            "O servico selecionado nao e mais valido. Recarregamos o catalogo para voce selecionar novamente.",
           variant: "destructive",
         });
         return;
@@ -650,7 +650,9 @@ const Booking = () => {
   if (authLoading) {
     return (
       <div className="min-h-screen bg-background flex items-center justify-center">
-        <p className="text-muted-foreground">{text.authLoading}</p>
+        <p className="text-muted-foreground">
+          {t("booking_auth_loading", "Caricamento autenticazione...")}
+        </p>
       </div>
     );
   }
@@ -660,22 +662,32 @@ const Booking = () => {
       <Header />
       <div className="container mx-auto max-w-2xl px-4 pt-24 pb-16">
         <h1 className="font-heading text-3xl font-bold mb-2">
-          {text.titleA} <span className="gold-text">{text.titleB}</span>
+          {t("booking_title_a", "PRENOTA")} <span className="gold-text">{t("booking_title_b", "ORARIO")}</span>
         </h1>
-        <p className="text-muted-foreground mb-8">{text.subtitle}</p>
+        <p className="text-muted-foreground mb-8">{t("booking_subtitle", "Scegli giorno e orario del tuo taglio")}</p>
         <p className="text-sm text-muted-foreground mb-8">
-          {text.windowPrefix} {format(parseLocalDate(bookingWindowStart), "dd/MM")} {text.windowMiddle} {format(parseLocalDate(bookingWindowEnd), "dd/MM")}. 
+          {t("booking_window_prefix", "Prenotazioni disponibili da")}{" "}
+          {format(parseLocalDate(bookingWindowStart), "dd/MM")}{" "}
+          {t("booking_window_middle", "a")}{" "}
+          {format(parseLocalDate(bookingWindowEnd), "dd/MM")}.
         </p>
 
         {hasBirthdayPromoGlobally && (
           <div className="mb-6 glass rounded-lg border border-primary/40 bg-primary/10 p-4">
             <div className="inline-flex items-center gap-2 text-primary font-semibold">
-              <Gift className="h-4 w-4" /> {text.birthdayPromoActive}
+              <Gift className="h-4 w-4" /> {t("booking_birthday_promo_active", "Promo compleanno attiva")}
             </div>
-            <p className="text-sm text-foreground mt-1">{birthdayDiscount.message || text.birthdayPromoFallback}</p>
+            <p className="text-sm text-foreground mt-1">
+              {birthdayDiscount.message || t("booking_birthday_promo_fallback", "Hai uno sconto compleanno sul servizio idoneo.")}
+            </p>
             <p className="text-xs text-muted-foreground mt-1">
-              {text.discountLabel}: {birthdayDiscount.discountPercent ? `${birthdayDiscount.discountPercent}%` : "50%"}
-              {birthdayDiscount.serviceType ? ` no servico ${birthdayDiscount.serviceType}` : ""}
+              {t("booking_discount_label", "Sconto")}:{" "}
+              {birthdayDiscount.discountPercent
+                ? `${birthdayDiscount.discountPercent}%`
+                : "50%"}
+              {birthdayDiscount.serviceType
+                ? ` no servico ${birthdayDiscount.serviceType}`
+                : ""}
             </p>
           </div>
         )}
@@ -683,37 +695,55 @@ const Booking = () => {
         <div className="mb-8 animate-fade-in">
           <div className="flex items-center gap-2 mb-4">
             <CheckCircle2 className="h-5 w-5 text-primary" />
-            <h2 className="font-heading text-lg font-semibold">{text.chooseService}</h2>
+            <h2 className="font-heading text-lg font-semibold">
+              {t("booking_choose_service", "Scegli il servizio")}
+            </h2>
           </div>
 
           {servicesLoading ? (
-            <p className="text-muted-foreground">{text.loadingServices}</p>
+            <p className="text-muted-foreground">{t("booking_loading_services", "Caricamento servizi...")}</p>
           ) : services.length === 0 ? (
-            <div className="glass rounded-lg p-5 text-center text-muted-foreground">{text.noServices}</div>
+            <div className="glass rounded-lg p-5 text-center text-muted-foreground">
+              {t("booking_no_services", "Nessun servizio disponibile nel catalogo.")}
+            </div>
           ) : (
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
               {services.map((service) => {
                 const isSelected = selectedServiceKey === service.key;
-                const serviceHasBirthdayPromo = hasBirthdayPromoGlobally && serviceMatchesDiscount(service.key, birthdayDiscount.serviceType);
+                const serviceHasBirthdayPromo =
+                  hasBirthdayPromoGlobally &&
+                  serviceMatchesDiscount(
+                    service.key,
+                    birthdayDiscount.serviceType,
+                  );
                 const discountedPrice = getDiscountedPrice(service.price);
                 return (
                   <button
                     key={service.key}
                     onClick={() => setSelectedServiceKey(service.key)}
                     className={`rounded-lg p-4 text-left transition-all border ${
-                      isSelected ? "border-primary bg-primary/10 text-primary" : "border-border bg-card hover:border-primary/30"
+                      isSelected
+                        ? "border-primary bg-primary/10 text-primary"
+                        : "border-border bg-card hover:border-primary/30"
                     }`}
                   >
-                    <p className="font-heading font-semibold">{service.label}</p>
+                    <p className="font-heading font-semibold">
+                      {service.label}
+                    </p>
                     {serviceHasBirthdayPromo ? (
                       <div className="mt-1">
-                        <p className="text-xs text-muted-foreground line-through">{formatMoney(service.price, currencyLocale)}</p>
+                        <p className="text-xs text-muted-foreground line-through">
+                          {formatMoney(service.price, currencyLocale)}
+                        </p>
                         <p className="text-sm text-primary font-semibold">
-                          {formatMoney(discountedPrice, currencyLocale)} ({birthdayPercent}% {text.birthdayOffSuffix})
+                          {formatMoney(discountedPrice, currencyLocale)} (
+                          {birthdayPercent}% {t("booking_birthday_off_suffix", "OFF compleanno")})
                         </p>
                       </div>
                     ) : (
-                      <p className="text-sm text-muted-foreground">{formatMoney(service.price, currencyLocale)}</p>
+                      <p className="text-sm text-muted-foreground">
+                        {formatMoney(service.price, currencyLocale)}
+                      </p>
                     )}
                   </button>
                 );
@@ -725,18 +755,24 @@ const Booking = () => {
         <div className="mb-8 animate-fade-in">
           <div className="flex items-center gap-2 mb-4">
             <CheckCircle2 className="h-5 w-5 text-primary" />
-            <h2 className="font-heading text-lg font-semibold">{text.chooseBarber}</h2>
+            <h2 className="font-heading text-lg font-semibold">
+              {t("booking_choose_barber", "Scegli il barbiere")}
+            </h2>
           </div>
 
           {barbersLoading ? (
-            <p className="text-muted-foreground">{text.loadingBarbers}</p>
+            <p className="text-muted-foreground">{t("booking_loading_barbers", "Caricamento barbieri...")}</p>
           ) : barbersError ? (
             <div className="glass rounded-lg p-5 text-center text-muted-foreground space-y-3">
               <p>{barbersError}</p>
-              <Button variant="outline" onClick={loadBarbers}>{text.retry}</Button>
+              <Button variant="outline" onClick={loadBarbers}>
+                {t("booking_retry", "Riprova")}
+              </Button>
             </div>
           ) : barbers.length === 0 ? (
-            <div className="glass rounded-lg p-5 text-center text-muted-foreground">{text.noBarbers}</div>
+            <div className="glass rounded-lg p-5 text-center text-muted-foreground">
+              {t("booking_no_barbers", "Nessun barbiere registrato.")}
+            </div>
           ) : (
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
               {barbers.map((barber) => {
@@ -754,18 +790,26 @@ const Booking = () => {
                     }}
                     className={`rounded-lg p-4 text-left transition-all border ${
                       isSelected
-                          ? "border-primary bg-primary/10 text-primary"
-                          : "border-border bg-card hover:border-primary/30"
+                        ? "border-primary bg-primary/10 text-primary"
+                        : "border-border bg-card hover:border-primary/30"
                     }`}
                   >
                     <div className="flex items-center gap-3">
                       {barber.imageUrl ? (
-                        <img src={barber.imageUrl} alt={barber.fullName} className="h-12 w-12 rounded-full object-cover border border-border" />
+                        <img
+                          src={barber.imageUrl}
+                          alt={barber.fullName}
+                          className="h-12 w-12 rounded-full object-cover border border-border"
+                        />
                       ) : (
-                        <div className="h-12 w-12 rounded-full border border-border bg-muted flex items-center justify-center text-xs">{text.noPhoto}</div>
+                        <div className="h-12 w-12 rounded-full border border-border bg-muted flex items-center justify-center text-xs">
+                          {t("booking_no_photo", "Senza foto")}
+                        </div>
                       )}
                       <div>
-                        <p className="font-heading font-semibold">{barber.fullName}</p>
+                        <p className="font-heading font-semibold">
+                          {barber.fullName}
+                        </p>
                       </div>
                     </div>
                   </button>
@@ -778,7 +822,9 @@ const Booking = () => {
         <div className="mb-8">
           <div className="flex items-center gap-2 mb-4">
             <CalendarDays className="h-5 w-5 text-primary" />
-            <h2 className="font-heading text-lg font-semibold">{text.chooseDay}</h2>
+            <h2 className="font-heading text-lg font-semibold">
+              {t("booking_choose_day", "Scegli il giorno")}
+            </h2>
           </div>
           <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
             {availableDates.map((d) => {
@@ -799,9 +845,13 @@ const Booking = () => {
                       : "border-border bg-card hover:border-primary/30"
                   }`}
                 >
-                  <div className="font-heading text-sm font-semibold uppercase">{format(d, "EEE", { locale: dateFnsLocale })}</div>
+                  <div className="font-heading text-sm font-semibold uppercase">
+                    {format(d, "EEE", { locale: dateFnsLocale })}
+                  </div>
                   <div className="text-lg font-bold">{format(d, "dd")}</div>
-                  <div className="text-xs text-muted-foreground">{format(d, "MMM", { locale: dateFnsLocale })}</div>
+                  <div className="text-xs text-muted-foreground">
+                    {format(d, "MMM", { locale: dateFnsLocale })}
+                  </div>
                 </button>
               );
             })}
@@ -811,20 +861,28 @@ const Booking = () => {
         <div className="mb-8 animate-fade-in">
           <div className="flex items-center gap-2 mb-4">
             <Clock className="h-5 w-5 text-primary" />
-            <h2 className="font-heading text-lg font-semibold">{text.availableTimes}</h2>
+            <h2 className="font-heading text-lg font-semibold">
+              {t("booking_available_times", "Orari disponibili")}
+            </h2>
           </div>
 
           {!selectedBarberId ? (
-            <div className="glass rounded-lg p-5 text-center text-muted-foreground">{text.selectBarber}</div>
+            <div className="glass rounded-lg p-5 text-center text-muted-foreground">
+              {t("booking_select_barber", "Seleziona un barbiere.")}
+            </div>
           ) : slotsLoading ? (
-            <p className="text-muted-foreground">{text.loadingSlots}</p>
+            <p className="text-muted-foreground">{t("booking_loading_slots", "Caricamento orari...")}</p>
           ) : slotsError ? (
             <div className="glass rounded-lg p-5 text-center text-muted-foreground space-y-3">
               <p>{slotsError}</p>
-              <Button variant="outline" onClick={() => loadSlots(selectedDate)}>{text.retry}</Button>
+              <Button variant="outline" onClick={() => loadSlots(selectedDate)}>
+                {t("booking_retry", "Riprova")}
+              </Button>
             </div>
           ) : slots.length === 0 ? (
-            <div className="glass rounded-lg p-5 text-center text-muted-foreground">{text.noSlots}</div>
+            <div className="glass rounded-lg p-5 text-center text-muted-foreground">
+              {t("booking_no_slots", "Nessun orario disponibile per questa data.")}
+            </div>
           ) : (
             <div className="grid grid-cols-3 sm:grid-cols-4 gap-3">
               {slots.map((slot) => {
@@ -832,13 +890,16 @@ const Booking = () => {
                 const isSelected = selectedTime === slot.time;
                 const statusLabel =
                   slot.status === "pago"
-                    ? text.slotPaid
+                    ? t("booking_slot_paid", "Pagato")
                     : slot.status === "agendado"
-                      ? text.slotScheduled
+                      ? t("booking_slot_scheduled", "Prenotato")
                       : slot.status === "desabilitado"
-                        ? text.slotDisabled
-                        : text.slotAvailable;
-                const reasonLabel = slot.status === "desabilitado" && slot.reason ? slot.reason : null;
+                        ? t("booking_slot_disabled", "Disabilitato")
+                        : t("booking_slot_available", "Disponibile");
+                const reasonLabel =
+                  slot.status === "desabilitado" && slot.reason
+                    ? slot.reason
+                    : null;
 
                 return (
                   <button
@@ -855,7 +916,11 @@ const Booking = () => {
                   >
                     <div>{slot.time.slice(0, 5)}</div>
                     <div className="text-[10px] mt-1">{statusLabel}</div>
-                    {reasonLabel && <div className="text-[10px] mt-1 opacity-80">{reasonLabel}</div>}
+                    {reasonLabel && (
+                      <div className="text-[10px] mt-1 opacity-80">
+                        {reasonLabel}
+                      </div>
+                    )}
                   </button>
                 );
               })}
@@ -869,59 +934,101 @@ const Booking = () => {
               <CheckCircle2 className="h-6 w-6 text-primary" />
               <div className="w-full">
                 <p className="font-heading font-semibold">
-                  {format(parseLocalDate(selectedDate), "EEEE, dd MMMM", { locale: dateFnsLocale })}
+                  {format(parseLocalDate(selectedDate), "EEEE, dd MMMM", {
+                    locale: dateFnsLocale,
+                  })}
                 </p>
-                <p className="text-primary font-heading text-lg">{selectedTime.slice(0, 5)}</p>
+                <p className="text-primary font-heading text-lg">
+                  {selectedTime.slice(0, 5)}
+                </p>
                 {selectedBarber && (
-                  <p className="text-xs text-muted-foreground">{text.barberLabel}: {selectedBarber.fullName}</p>
+                  <p className="text-xs text-muted-foreground">
+                    {t("booking_barber_label", "Barbiere")}: {selectedBarber.fullName}
+                  </p>
                 )}
                 {selectedService && (
                   <div className="text-sm text-muted-foreground">
                     <p>{selectedService.label}</p>
                     {hasBirthdayDiscountForSelectedService ? (
                       <p>
-                        <span className="line-through opacity-80 mr-2">{formatMoney(selectedService.price, currencyLocale)}</span>
-                        <span className="text-primary font-semibold">{formatMoney(getDiscountedPrice(selectedService.price), currencyLocale)}</span>
+                        <span className="line-through opacity-80 mr-2">
+                          {formatMoney(selectedService.price, currencyLocale)}
+                        </span>
+                        <span className="text-primary font-semibold">
+                          {formatMoney(
+                            getDiscountedPrice(selectedService.price),
+                            currencyLocale,
+                          )}
+                        </span>
                       </p>
                     ) : (
-                      <p>{formatMoney(selectedService.price, currencyLocale)}</p>
+                      <p>
+                        {formatMoney(selectedService.price, currencyLocale)}
+                      </p>
                     )}
                   </div>
                 )}
 
                 {selectedService && hasBirthdayDiscountForSelectedService && (
                   <p className="text-xs text-primary mt-1">
-                    {text.birthdayWillApply}
+                    {t(
+                      "booking_birthday_will_apply",
+                      "Lo sconto compleanno verra applicato a questo servizio.",
+                    )}
                   </p>
                 )}
 
                 {lastDiscountSummary?.applied && (
                   <div className="mt-2 rounded-md border border-primary/40 bg-primary/10 p-2">
-                    <p className="text-sm font-semibold text-primary">{text.birthdayApplied}</p>
+                    <p className="text-sm font-semibold text-primary">
+                      {t("booking_birthday_applied", "Sconto compleanno applicato")}
+                    </p>
                     {lastDiscountSummary.message && (
-                      <p className="text-xs text-muted-foreground mt-1">{lastDiscountSummary.message}</p>
+                      <p className="text-xs text-muted-foreground mt-1">
+                        {lastDiscountSummary.message}
+                      </p>
                     )}
                     <p className="text-xs text-foreground mt-1">
-                      {text.originalPrice}: {formatMoney(lastDiscountSummary.basePrice || selectedService?.price || 0, currencyLocale)}
+                      {t("booking_original_price", "Prezzo originale")}:{" "}
+                      {formatMoney(
+                        lastDiscountSummary.basePrice ||
+                          selectedService?.price ||
+                          0,
+                        currencyLocale,
+                      )}
                     </p>
                     <p className="text-xs text-foreground">
-                      {text.finalPrice}: {formatMoney(lastDiscountSummary.finalPrice || selectedService?.price || 0, currencyLocale)}
+                      {t("booking_final_price", "Prezzo finale")}:{" "}
+                      {formatMoney(
+                        lastDiscountSummary.finalPrice ||
+                          selectedService?.price ||
+                          0,
+                        currencyLocale,
+                      )}
                     </p>
                   </div>
                 )}
 
                 <div className="mt-3 space-y-2">
-                  <p className="text-xs text-muted-foreground">{text.paymentMethod}</p>
+                  <p className="text-xs text-muted-foreground">
+                    {t("booking_payment_method", "Metodo di pagamento")}
+                  </p>
                   <div className="rounded-md border border-border bg-card px-3 py-2 text-sm">
-                    {text.inPersonPayment}
+                    {t("booking_in_person_payment", "Pagamento in presenza in barberia")}
                   </div>
 
                   <Button
                     onClick={handleBook}
-                    disabled={submitting || !selectedServiceKey || !selectedBarberId || !selectedDate || !selectedTime}
+                    disabled={
+                      submitting ||
+                      !selectedServiceKey ||
+                      !selectedBarberId ||
+                      !selectedDate ||
+                      !selectedTime
+                    }
                     className="font-heading w-full mt-2"
                   >
-                    {submitting ? text.booking : text.confirmBooking}
+                    {submitting ? t("booking_submitting", "Prenotazione...") : t("booking_confirm", "CONFERMA PRENOTAZIONE")}
                   </Button>
                 </div>
               </div>
