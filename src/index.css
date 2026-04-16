@@ -1,0 +1,92 @@
+@import url('https://fonts.googleapis.com/css2?family=Oswald:wght@400;500;600;700&family=Inter:wght@300;400;500;600&display=swap');
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    --background: 220 30% 6%;
+    --foreground: 45 30% 90%;
+
+    --card: 220 25% 10%;
+    --card-foreground: 45 30% 90%;
+
+    --popover: 220 25% 10%;
+    --popover-foreground: 45 30% 90%;
+
+    --primary: 43 72% 47%;
+    --primary-foreground: 220 30% 6%;
+
+    --secondary: 225 60% 12%;
+    --secondary-foreground: 45 30% 90%;
+
+    --muted: 220 20% 15%;
+    --muted-foreground: 220 10% 55%;
+
+    --accent: 43 72% 47%;
+    --accent-foreground: 220 30% 6%;
+
+    --destructive: 0 62% 50%;
+    --destructive-foreground: 0 0% 100%;
+
+    --border: 220 15% 18%;
+    --input: 220 15% 18%;
+    --ring: 43 72% 47%;
+
+    --radius: 0.5rem;
+
+    --sidebar-background: 220 25% 8%;
+    --sidebar-foreground: 45 30% 90%;
+    --sidebar-primary: 43 72% 47%;
+    --sidebar-primary-foreground: 220 30% 6%;
+    --sidebar-accent: 220 20% 15%;
+    --sidebar-accent-foreground: 45 30% 90%;
+    --sidebar-border: 220 15% 18%;
+    --sidebar-ring: 43 72% 47%;
+
+    --gold: 43 72% 47%;
+    --gold-light: 43 80% 60%;
+    --gold-dark: 43 65% 35%;
+    --navy: 225 60% 12%;
+    --navy-deep: 230 70% 8%;
+  }
+
+  .dark {
+    --background: 220 30% 6%;
+    --foreground: 45 30% 90%;
+  }
+}
+
+@layer base {
+  * {
+    @apply border-border;
+  }
+
+  body {
+    @apply bg-background text-foreground font-body antialiased;
+  }
+
+  h1, h2, h3, h4, h5, h6 {
+    @apply font-heading;
+  }
+}
+
+@layer utilities {
+  .gold-gradient {
+    background: linear-gradient(135deg, hsl(43, 72%, 47%), hsl(43, 80%, 60%));
+  }
+  
+  .gold-text {
+    background: linear-gradient(135deg, hsl(43, 72%, 47%), hsl(43, 80%, 60%));
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+
+  .glass {
+    background: hsla(220, 25%, 10%, 0.8);
+    backdrop-filter: blur(12px);
+    border: 1px solid hsla(43, 72%, 47%, 0.1);
+  }
+}
