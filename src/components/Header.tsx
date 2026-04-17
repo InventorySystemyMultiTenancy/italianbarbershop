@@ -73,18 +73,6 @@ const Header = () => {
               </Link>
               {isAdmin && (
                 <>
-                  <Link to="/admin/languages">
-                    <Button
-                      variant="ghost"
-                      size="sm"
-                      className="gap-2 text-foreground hover:text-primary"
-                    >
-                      <Languages className="h-4 w-4" />
-                      <span className="hidden sm:inline">
-                        {t("nav_languages", "Idiomas")}
-                      </span>
-                    </Button>
-                  </Link>
                   <Link to="/admin">
                     <Button
                       variant="ghost"
