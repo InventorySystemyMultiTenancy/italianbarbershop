@@ -23,6 +23,7 @@ import { Input } from "@/components/ui/input";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Textarea } from "@/components/ui/textarea";
 import { useAuth } from "@/contexts/AuthContext";
+import { useLanguage } from "@/contexts/LanguageContext";
 import {
   ApiClientError,
   type Barber,
@@ -180,6 +181,7 @@ const AdminDashboard = () => {
       typeof window !== "undefined" ? `${window.location.origin}/assinatura/sucesso` : "";
 
   const { user, isAdmin, loading: authLoading } = useAuth();
+  const { t } = useLanguage();
   const navigate = useNavigate();
   const currentPeriod = getCurrentPeriod();
 
@@ -1131,7 +1133,7 @@ const AdminDashboard = () => {
   if (authLoading) {
     return (
       <div className="min-h-screen bg-background flex items-center justify-center">
-        <p className="text-muted-foreground">Carregando autenticacao...</p>
+        <p className="text-muted-foreground">{t("booking_auth_loading","Carregando autenticacao...")}</p>
       </div>
     );
   }
@@ -1147,20 +1149,20 @@ const AdminDashboard = () => {
         <div className="flex items-center gap-3 mb-8">
           <Shield className="h-7 w-7 text-primary" />
           <h1 className="font-heading text-3xl font-bold">
-            PAINEL <span className="gold-text">ADMIN</span>
+            {t("admin_title","PAINEL")} <span className="gold-text">{t("admin_title_b","ADMIN")}</span>
           </h1>
         </div>
 
         <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
           <TabsList className="w-full max-w-3xl grid grid-cols-5 mb-8">
-            <TabsTrigger value="agenda">Agenda</TabsTrigger>
+            <TabsTrigger value="agenda">{t("admin_tab_agenda","Agenda")}</TabsTrigger>
             <TabsTrigger value="relatorios" className="gap-2">
-              <BarChart3 className="h-4 w-4" /> Relatorios
+              <BarChart3 className="h-4 w-4" /> {t("admin_tab_reports","Relatorios")}
             </TabsTrigger>
-            <TabsTrigger value="barbeiros">Barbeiros</TabsTrigger>
-            <TabsTrigger value="planos">Planos</TabsTrigger>
+            <TabsTrigger value="barbeiros">{t("admin_tab_barbers","Barbeiros")}</TabsTrigger>
+            <TabsTrigger value="planos">{t("admin_tab_plans","Planos")}</TabsTrigger>
             <TabsTrigger value="assinantes" className="gap-2">
-              <Users className="h-4 w-4" /> Assinantes
+              <Users className="h-4 w-4" /> {t("admin_tab_subscribers","Assinantes")}
             </TabsTrigger>
           </TabsList>
 
@@ -1169,17 +1171,17 @@ const AdminDashboard = () => {
               <div className="glass rounded-lg p-5 text-center">
                 <CalendarDays className="h-8 w-8 text-primary mx-auto mb-2" />
                 <p className="text-2xl font-heading font-bold">{appointments.length}</p>
-                <p className="text-sm text-muted-foreground">Total do dia</p>
+                <p className="text-sm text-muted-foreground">{t("admin_total_day","Total do dia")}</p>
               </div>
               <div className="glass rounded-lg p-5 text-center">
                 <CheckCircle className="h-8 w-8 text-green-400 mx-auto mb-2" />
                 <p className="text-2xl font-heading font-bold">{totals.totalPago}</p>
-                <p className="text-sm text-muted-foreground">Cortes pagos</p>
+                <p className="text-sm text-muted-foreground">{t("admin_cuts_paid","Cortes pagos")}</p>
               </div>
               <div className="glass rounded-lg p-5 text-center">
                 <DollarSign className="h-8 w-8 text-primary mx-auto mb-2" />
                 <p className="text-2xl font-heading font-bold">{formatMoney(totals.faturamento)}</p>
-                <p className="text-sm text-muted-foreground">Faturamento</p>
+                <p className="text-sm text-muted-foreground">{t("admin_revenue","Faturamento")}</p>
               </div>
             </div>
 
@@ -1195,8 +1197,8 @@ const AdminDashboard = () => {
             <section className="glass rounded-lg p-4 md:p-5 space-y-4">
               <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2">
                 <div>
-                  <h2 className="font-heading text-lg font-semibold">Grade de horarios por barbeiro</h2>
-                  <p className="text-xs text-muted-foreground">Data selecionada: {formatDateBr(filterDate)}</p>
+                  <h2 className="font-heading text-lg font-semibold">{t("admin_schedule_title","Grade de horarios por barbeiro")}</h2>
+                  <p className="text-xs text-muted-foreground">{t("admin_date_selected","Data selecionada")}: {formatDateBr(filterDate)}</p>
                 </div>
               </div>
 
@@ -1211,18 +1213,18 @@ const AdminDashboard = () => {
                 <Input
                   value={newDayHourReason}
                   onChange={(event) => setNewDayHourReason(event.target.value)}
-                  placeholder="Motivo opcional"
+                  placeholder={t("admin_reason_placeholder","Motivo opcional")}
                   maxLength={120}
                 />
                 <Button type="submit" className="gap-1" disabled={dayHourSubmitting}>
-                  <Plus className="h-4 w-4" /> {dayHourSubmitting ? "Salvando..." : "Criar horario no dia"}
+                  <Plus className="h-4 w-4" /> {dayHourSubmitting ? t("admin_saving","Salvando...") : t("admin_create_slot","Criar horario no dia")}
                 </Button>
               </form>
 
               {agendaLoading ? (
-                <p className="text-sm text-muted-foreground">Carregando grade do dia...</p>
+                <p className="text-sm text-muted-foreground">{t("admin_loading_schedule","Carregando grade do dia...")}</p>
               ) : barbers.filter((barber) => barber.isActive).length === 0 ? (
-                <p className="text-sm text-muted-foreground">Nenhum barbeiro ativo para exibir a grade.</p>
+                <p className="text-sm text-muted-foreground">{t("admin_no_active_barbers","Nenhum barbeiro ativo para exibir a grade.")}</p>
               ) : (
                 <div className="space-y-4">
                   {barbers
@@ -1234,11 +1236,11 @@ const AdminDashboard = () => {
                         <div key={barber.id} className="rounded-md border border-border/70 p-3 space-y-3">
                           <div className="flex items-center justify-between gap-2">
                             <p className="font-medium">{barber.fullName}</p>
-                            <p className="text-xs text-muted-foreground">{slots.length} horarios</p>
+                            <p className="text-xs text-muted-foreground">{slots.length} {t("admin_slots_count","horarios")}</p>
                           </div>
 
                           {slots.length === 0 ? (
-                            <p className="text-sm text-muted-foreground">Sem slots para este barbeiro nesta data.</p>
+                            <p className="text-sm text-muted-foreground">{t("admin_no_slots_barber","Sem slots para este barbeiro nesta data.")}</p>
                           ) : (
                             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-2">
                               {slots.map((slot) => {
@@ -1261,7 +1263,7 @@ const AdminDashboard = () => {
                                     </div>
 
                                     {reason && (
-                                      <p className="text-xs text-muted-foreground mt-2 min-h-8">Motivo: {reason}</p>
+                                      <p className="text-xs text-muted-foreground mt-2 min-h-8">{t("admin_reason_prefix","Motivo")}: {reason}</p>
                                     )}
 
                                     <div className="mt-2 flex flex-col sm:flex-row gap-2">
@@ -1273,7 +1275,7 @@ const AdminDashboard = () => {
                                         onClick={() => handleToggleDaySlot(barber.id, slot)}
                                         className="w-full"
                                       >
-                                        {visualStatus === "desabilitado" ? "Reativar" : "Desativar"}
+                                        {visualStatus === "desabilitado" ? t("admin_reactivate","Reativar") : t("admin_deactivate","Desativar")}
                                       </Button>
 
                                       {override && (
@@ -1285,7 +1287,7 @@ const AdminDashboard = () => {
                                           onClick={() => handleDeleteDayHourOverride(override.id)}
                                           className="w-full text-destructive border-destructive/30 hover:bg-destructive/10"
                                         >
-                                          Remover override
+                                          {t("admin_remove_override","Remover override")}
                                         </Button>
                                       )}
                                     </div>
@@ -1302,14 +1304,14 @@ const AdminDashboard = () => {
             </section>
 
             {loading ? (
-              <p className="text-muted-foreground text-center py-12">Carregando...</p>
+              <p className="text-muted-foreground text-center py-12">{t("admin_loading","Carregando...")}</p>
             ) : appointments.length === 0 ? (
               <div className="text-center py-16 glass rounded-lg">
-                <p className="text-muted-foreground">Nenhum agendamento nesta data</p>
+                <p className="text-muted-foreground">{t("admin_no_appointments","Nenhum agendamento nesta data")}</p>
               </div>
             ) : (
               <div className="space-y-3">
-                <h2 className="font-heading text-lg font-semibold">Horarios de clientes</h2>
+                <h2 className="font-heading text-lg font-semibold">{t("admin_client_schedule_title","Horarios de clientes")}</h2>
                 {appointments.map((appointment) => {
                   const statusClass =
                     appointment.status === "pago"
@@ -1367,10 +1369,10 @@ const AdminDashboard = () => {
                             )}
                           </div>
                           <div className="flex flex-wrap items-center gap-2">
-                            <p className="text-sm text-foreground">Cliente: {appointment.fullName || "Sem nome"}</p>
+                            <p className="text-sm text-foreground">{t("admin_client_label","Cliente")}: {appointment.fullName || t("admin_no_name","Sem nome")}</p>
                             {isPremiumSubscriber && (
                               <span className="text-[11px] px-2 py-0.5 rounded-full bg-green-500/20 text-green-400 border border-green-500/40">
-                                Assinante premium
+                                {t("admin_premium_subscriber","Assinante premium")}
                               </span>
                             )}
                             <Button
@@ -1379,31 +1381,31 @@ const AdminDashboard = () => {
                               onClick={() => sendWhatsappConfirmation(appointment)}
                               className="h-8 px-2 gap-1 text-green-400 border-green-500/40 hover:bg-green-500/10 w-full sm:w-auto"
                             >
-                              <MessageCircle className="h-3.5 w-3.5" /> Confirmar via WhatsApp
+                              <MessageCircle className="h-3.5 w-3.5" /> {t("admin_confirm_whatsapp","Confirmar via WhatsApp")}
                             </Button>
                           </div>
                           {isPremiumSubscriber && (
-                            <p className="text-xs text-green-400">Plano: {subscriptionPlanName}</p>
+                            <p className="text-xs text-green-400">{t("admin_plan_label","Plano")}: {subscriptionPlanName}</p>
                           )}
-                          <p className="text-sm text-foreground">Servico: {toServiceLabel(appointment)}</p>
-                          <p className="text-sm text-foreground">Valor: {formatMoney(appointment.price || 0)}</p>
+                          <p className="text-sm text-foreground">{t("admin_service_label","Servico")}: {toServiceLabel(appointment)}</p>
+                          <p className="text-sm text-foreground">{t("admin_value_label","Valor")}: {formatMoney(appointment.price || 0)}</p>
                           {shouldShowBirthdayBadge && (
                             <div className="mt-1 rounded-md border border-primary/40 bg-primary/10 p-2">
-                              <p className="text-xs font-semibold text-primary">Desconto de aniversario aplicado</p>
+                              <p className="text-xs font-semibold text-primary">{t("admin_birthday_discount","Desconto de aniversario aplicado")}</p>
                               {appointment.discount?.message && (
                                 <p className="text-xs text-muted-foreground">{appointment.discount.message}</p>
                               )}
                               {birthdayDiscountInferred && !appointment.discount?.applied && (
-                                <p className="text-xs text-muted-foreground">Desconto inferido pela data de aniversario e servico corte.</p>
+                                <p className="text-xs text-muted-foreground">{t("admin_birthday_inferred","Desconto inferido pela data de aniversario e servico corte.")}</p>
                               )}
                               {isHalfPriceInferred && !birthdayDiscountInferred && !appointment.discount?.applied && (
-                                <p className="text-xs text-muted-foreground">Desconto inferido pela diferenca entre preco base e preco cobrado.</p>
+                                <p className="text-xs text-muted-foreground">{t("admin_birthday_inferred_diff","Desconto inferido pela diferenca entre preco base e preco cobrado.")}</p>
                               )}
                               <p className="text-xs text-foreground">
-                                Original: {formatMoney(inferredOriginalPrice)}
+                                {t("admin_original_price","Original")}: {formatMoney(inferredOriginalPrice)}
                               </p>
                               <p className="text-xs text-foreground">
-                                Final: {formatMoney(inferredFinalPrice)}
+                                {t("admin_final_price","Final")}: {formatMoney(inferredFinalPrice)}
                               </p>
                             </div>
                           )}
@@ -1419,7 +1421,7 @@ const AdminDashboard = () => {
                               onClick={() => updateStatus(appointment.id, "pago")}
                               className="text-green-400 border-green-400/30 hover:bg-green-400/10 gap-1 w-full sm:w-auto justify-center"
                             >
-                              <CheckCircle className="h-3 w-3" /> Pago
+                              <CheckCircle className="h-3 w-3" /> {t("admin_btn_paid","Pago")}
                             </Button>
                           )}
 
@@ -1430,7 +1432,7 @@ const AdminDashboard = () => {
                               onClick={() => updateStatus(appointment.id, "disponivel")}
                               className="gap-1 w-full sm:w-auto justify-center"
                             >
-                              <RotateCcw className="h-3 w-3" /> Liberar horario
+                              <RotateCcw className="h-3 w-3" /> {t("admin_btn_release","Liberar horario")}
                             </Button>
                           )}
 
@@ -1440,7 +1442,7 @@ const AdminDashboard = () => {
                             onClick={() => removeAppointment(appointment.id)}
                             className="text-destructive border-destructive/30 hover:bg-destructive/10 gap-1 w-full sm:w-auto justify-center"
                           >
-                            <Trash2 className="h-3 w-3" /> Excluir agendamento
+                            <Trash2 className="h-3 w-3" /> {t("admin_btn_delete","Excluir agendamento")}
                           </Button>
                         </div>
                       </div>
@@ -1453,24 +1455,24 @@ const AdminDashboard = () => {
 
           <TabsContent value="barbeiros" className="space-y-6">
             <section className="glass rounded-lg p-4 md:p-5">
-              <h2 className="font-heading text-xl font-semibold mb-4">Gerenciar barbeiros</h2>
+              <h2 className="font-heading text-xl font-semibold mb-4">{t("admin_manage_barbers","Gerenciar barbeiros")}</h2>
 
               <form onSubmit={handleSubmitBarber} className="space-y-3 mb-5">
                 <Input
-                  placeholder="Nome do barbeiro"
+                  placeholder={t("admin_barber_name_placeholder","Nome do barbeiro")}
                   value={barberName}
                   onChange={(event) => setBarberName(event.target.value)}
                   required
                 />
 
                 <Input
-                  placeholder="URL da imagem (opcional)"
+                  placeholder={t("admin_image_url_placeholder","URL da imagem (opcional)")}
                   value={barberImageUrl}
                   onChange={(event) => setBarberImageUrl(event.target.value)}
                 />
 
                 <div>
-                  <label className="block text-xs text-muted-foreground mb-1">Ou envie uma imagem</label>
+                  <label className="block text-xs text-muted-foreground mb-1">{t("admin_upload_image","Ou envie uma imagem")}</label>
                   <Input type="file" accept="image/*" onChange={(event) => handleImageUpload(event.target.files?.[0] || null)} />
                 </div>
 
@@ -1480,11 +1482,11 @@ const AdminDashboard = () => {
 
                 <div className="flex flex-col sm:flex-row gap-2">
                   <Button type="submit" disabled={barberSubmitting}>
-                    {barberSubmitting ? "Salvando..." : editingBarberId ? "Atualizar barbeiro" : "Cadastrar barbeiro"}
+                    {barberSubmitting ? t("admin_saving","Salvando...") : editingBarberId ? t("admin_update_barber","Atualizar barbeiro") : t("admin_register_barber","Cadastrar barbeiro")}
                   </Button>
                   {editingBarberId && (
                     <Button type="button" variant="outline" onClick={resetBarberForm}>
-                      Cancelar edicao
+                      {t("admin_cancel_edit","Cancelar edicao")}
                     </Button>
                   )}
                 </div>
@@ -1492,16 +1494,16 @@ const AdminDashboard = () => {
 
               {barbersError ? (
                 <div className="rounded-md border border-destructive/40 p-3">
-                  <p className="text-destructive font-semibold">Erro ao carregar barbeiros</p>
+                  <p className="text-destructive font-semibold">{t("admin_error_load_barbers","Erro ao carregar barbeiros")}</p>
                   <p className="text-sm text-muted-foreground mt-1">{barbersError}</p>
                   <Button variant="outline" className="mt-3" onClick={loadAdminBarbers}>
-                    Tentar novamente
+                    {t("admin_retry","Tentar novamente")}
                   </Button>
                 </div>
               ) : barbersLoading ? (
-                <p className="text-sm text-muted-foreground">Carregando barbeiros...</p>
+                <p className="text-sm text-muted-foreground">{t("admin_loading","Carregando...")}</p>
               ) : barbers.length === 0 ? (
-                <p className="text-sm text-muted-foreground">Nenhum barbeiro cadastrado.</p>
+                <p className="text-sm text-muted-foreground">{t("admin_no_barbers","Nenhum barbeiro cadastrado.")}</p>
               ) : (
                 <div className="space-y-2">
                   {barbers.map((barber) => (
@@ -1510,17 +1512,17 @@ const AdminDashboard = () => {
                         {barber.imageUrl ? (
                           <img src={barber.imageUrl} alt={barber.fullName} className="h-12 w-12 rounded-full object-cover border border-border" />
                         ) : (
-                          <div className="h-12 w-12 rounded-full border border-border bg-muted flex items-center justify-center text-xs">Sem foto</div>
+                          <div className="h-12 w-12 rounded-full border border-border bg-muted flex items-center justify-center text-xs">{t("admin_no_photo","Sem foto")}</div>
                         )}
                         <div>
                           <p className="font-medium">{barber.fullName}</p>
-                          <p className="text-xs text-muted-foreground">{barber.isActive ? "Ativo" : "Inativo"}</p>
+                          <p className="text-xs text-muted-foreground">{barber.isActive ? t("admin_active","Ativo") : t("admin_inactive","Inativo")}</p>
                         </div>
                       </div>
 
                       <div className="flex flex-col sm:flex-row gap-2">
                         <Button type="button" variant="outline" onClick={() => startEditBarber(barber)}>
-                          Editar
+                          {t("admin_edit","Editar")}
                         </Button>
                         {barber.isActive && (
                           <Button type="button" variant="outline" className="text-destructive border-destructive/30 hover:bg-destructive/10" onClick={() => handleDeactivateBarber(barber.id)}>
@@ -1537,19 +1539,19 @@ const AdminDashboard = () => {
 
           <TabsContent value="planos" className="space-y-6">
             <section className="glass rounded-lg p-4 md:p-5 space-y-4">
-              <h2 className="font-heading text-xl font-semibold">Novo plano mensal</h2>
+              <h2 className="font-heading text-xl font-semibold">{t("admin_new_plan","Novo plano mensal")}</h2>
 
               <form onSubmit={handleCreateSubscriptionPlan} className="space-y-3">
                 <Input
                   value={planName}
                   onChange={(event) => setPlanName(event.target.value)}
-                  placeholder="Nome do plano"
+                  placeholder={t("admin_plan_name_placeholder","Nome do plano")}
                   required
                 />
                 <Textarea
                   value={planDescription}
                   onChange={(event) => setPlanDescription(event.target.value)}
-                  placeholder="Descricao do plano"
+                  placeholder={t("admin_plan_desc_placeholder","Descricao do plano")}
                   rows={2}
                 />
                 <Input
@@ -1558,44 +1560,44 @@ const AdminDashboard = () => {
                   step="0.01"
                   value={planAmount}
                   onChange={(event) => setPlanAmount(event.target.value)}
-                  placeholder="Valor mensal"
+                  placeholder={t("admin_plan_amount_placeholder","Valor mensal")}
                   required
                 />
 
                 <Button type="submit" disabled={planSubmitting}>
-                  {planSubmitting ? "Criando plano..." : "Criar plano mensal"}
+                  {planSubmitting ? t("admin_creating_plan","Criando plano...") : t("admin_create_plan","Criar plano mensal")}
                 </Button>
               </form>
             </section>
 
             <section className="glass rounded-lg p-4 md:p-5 space-y-4">
-              <h2 className="font-heading text-xl font-semibold">Planos cadastrados</h2>
+              <h2 className="font-heading text-xl font-semibold">{t("admin_registered_plans","Planos cadastrados")}</h2>
 
               {plansError ? (
                 <div className="rounded-md border border-destructive/40 p-3">
-                  <p className="text-destructive font-semibold">Erro ao carregar planos</p>
+                  <p className="text-destructive font-semibold">{t("admin_error_load_plans","Erro ao carregar planos")}</p>
                   <p className="text-sm text-muted-foreground mt-1">{plansError}</p>
                   <Button variant="outline" className="mt-3" onClick={loadAdminSubscriptionPlans}>
-                    Tentar novamente
+                    {t("admin_retry","Tentar novamente")}
                   </Button>
                 </div>
               ) : plansLoading ? (
-                <p className="text-sm text-muted-foreground">Carregando planos...</p>
+                <p className="text-sm text-muted-foreground">{t("admin_loading","Carregando...")}</p>
               ) : subscriptionPlans.length === 0 ? (
-                <p className="text-sm text-muted-foreground">Nenhum plano cadastrado.</p>
+                <p className="text-sm text-muted-foreground">{t("admin_no_plans","Nenhum plano cadastrado.")}</p>
               ) : (
                 <div className="overflow-x-auto">
                   <table className="w-full text-sm">
                     <thead>
                       <tr className="border-b border-border/70 text-left text-muted-foreground">
-                        <th className="py-2 pr-3">Nome</th>
-                        <th className="py-2 pr-3">Descricao</th>
-                        <th className="py-2 pr-3">Valor</th>
-                        <th className="py-2 pr-3">Frequencia</th>
-                        <th className="py-2 pr-3">Moeda</th>
+                        <th className="py-2 pr-3">{t("admin_col_name","Nome")}</th>
+                        <th className="py-2 pr-3">{t("admin_col_description","Descricao")}</th>
+                        <th className="py-2 pr-3">{t("admin_col_value","Valor")}</th>
+                        <th className="py-2 pr-3">{t("admin_col_frequency","Frequencia")}</th>
+                        <th className="py-2 pr-3">{t("admin_col_currency","Moeda")}</th>
                         <th className="py-2 pr-3">preapproval_plan_id</th>
-                        <th className="py-2 pr-3">Ativo</th>
-                        <th className="py-2">Acao</th>
+                        <th className="py-2 pr-3">{t("admin_col_active","Ativo")}</th>
+                        <th className="py-2">{t("admin_col_action","Acao")}</th>
                       </tr>
                     </thead>
                     <tbody>
@@ -1611,7 +1613,7 @@ const AdminDashboard = () => {
                             <td className="py-2 pr-3">{plan.frequency || "-"} {plan.frequencyType || "-"}</td>
                             <td className="py-2 pr-3">{plan.currencyId || "BRL"}</td>
                             <td className="py-2 pr-3 break-all">{plan.preapprovalPlanId || plan.id}</td>
-                            <td className="py-2 pr-3">{plan.isActive ? "Sim" : "Nao"}</td>
+                            <td className="py-2 pr-3">{plan.isActive ? t("admin_yes","Sim") : t("admin_no","Nao")}</td>
                             <td className="py-2">
                               <Button
                                 type="button"
@@ -1620,7 +1622,7 @@ const AdminDashboard = () => {
                                 disabled={isToggling}
                                 onClick={() => handleToggleSubscriptionPlan(plan)}
                               >
-                                {isToggling ? "Atualizando..." : plan.isActive ? "Inativar" : "Ativar"}
+                                {isToggling ? t("admin_updating","Atualizando...") : plan.isActive ? t("admin_inactivate","Inativar") : t("admin_activate","Ativar")}
                               </Button>
                             </td>
                           </tr>
@@ -1637,33 +1639,33 @@ const AdminDashboard = () => {
             <section className="glass rounded-lg p-4 md:p-5 space-y-4">
               <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2">
                 <div>
-                  <h2 className="font-heading text-xl font-semibold">Assinantes premium</h2>
-                  <p className="text-xs text-muted-foreground">Usuarios com assinatura ativa ou pendente.</p>
+                  <h2 className="font-heading text-xl font-semibold">{t("admin_premium_subscribers","Assinantes premium")}</h2>
+                  <p className="text-xs text-muted-foreground">{t("admin_subscribers_desc","Usuarios com assinatura ativa ou pendente.")}</p>
                 </div>
                 <Button variant="outline" onClick={loadAdminSubscribers} disabled={subscribersLoading}>
-                  {subscribersLoading ? "Atualizando..." : "Atualizar lista"}
+                  {subscribersLoading ? t("admin_refreshing","Atualizando...") : t("admin_refresh_list","Atualizar lista")}
                 </Button>
               </div>
 
               {subscribersError ? (
                 <div className="rounded-md border border-destructive/40 p-3">
-                  <p className="text-destructive font-semibold">Erro ao carregar assinantes</p>
+                  <p className="text-destructive font-semibold">{t("admin_error_load_subscribers","Erro ao carregar assinantes")}</p>
                   <p className="text-sm text-muted-foreground mt-1">{subscribersError}</p>
                 </div>
               ) : subscribersLoading ? (
-                <p className="text-sm text-muted-foreground">Carregando assinantes...</p>
+                <p className="text-sm text-muted-foreground">{t("admin_loading","Carregando...")}</p>
               ) : subscribers.length === 0 ? (
-                <p className="text-sm text-muted-foreground">Nenhum assinante premium encontrado.</p>
+                <p className="text-sm text-muted-foreground">{t("admin_no_subscribers","Nenhum assinante premium encontrado.")}</p>
               ) : (
                 <div className="overflow-x-auto">
                   <table className="w-full text-sm">
                     <thead>
                       <tr className="border-b border-border/70 text-left text-muted-foreground">
                         <th className="py-2 pr-3">Nome</th>
-                        <th className="py-2 pr-3">Plano</th>
-                        <th className="py-2 pr-3">Status</th>
+                        <th className="py-2 pr-3">{t("admin_tab_plans","Plano")}</th>
+                        <th className="py-2 pr-3">{t("admin_col_status","Status")}</th>
                         <th className="py-2 pr-3">Valor</th>
-                        <th className="py-2">Contato</th>
+                        <th className="py-2">{t("admin_col_contact","Contato")}</th>
                       </tr>
                     </thead>
                     <tbody>
@@ -1711,54 +1713,54 @@ const AdminDashboard = () => {
             <section className="glass rounded-lg p-4 md:p-5">
               <div className="flex flex-col lg:flex-row lg:items-end gap-3">
                 <div className="w-full lg:w-auto">
-                  <label className="block text-sm text-muted-foreground mb-1">Data inicial</label>
+                  <label className="block text-sm text-muted-foreground mb-1">{t("admin_date_from","Data inicial")}</label>
                   <Input type="date" value={filterStartDate} onChange={(event) => setFilterStartDate(event.target.value)} />
                 </div>
                 <div className="w-full lg:w-auto">
-                  <label className="block text-sm text-muted-foreground mb-1">Data final</label>
+                  <label className="block text-sm text-muted-foreground mb-1">{t("admin_date_to","Data final")}</label>
                   <Input type="date" value={filterEndDate} onChange={(event) => setFilterEndDate(event.target.value)} />
                 </div>
                 <Button onClick={applyReportFilter} className="lg:mb-[1px]" disabled={financialLoading || variableLoading}>
-                  Aplicar filtro
+                  {t("admin_apply_filter","Aplicar filtro")}
                 </Button>
               </div>
             </section>
 
             {reportsForbidden ? (
               <div className="glass rounded-lg p-8 text-center">
-                <p className="font-heading text-lg">Sem permissao para acessar relatorios.</p>
-                <p className="text-sm text-muted-foreground mt-2">Se o problema persistir, faca login novamente.</p>
-                <Button className="mt-4" variant="outline" onClick={() => navigate("/login")}>Ir para login</Button>
+                <p className="font-heading text-lg">{t("admin_reports_no_permission","Sem permissao para acessar relatorios.")}</p>
+                <p className="text-sm text-muted-foreground mt-2">{t("admin_reports_relogin","Se o problema persistir, faca login novamente.")}</p>
+                <Button className="mt-4" variant="outline" onClick={() => navigate("/login")}>{t("admin_reports_login","Ir para login")}</Button>
               </div>
             ) : (
               <>
                 <section className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-5 gap-4">
                   <div className="glass rounded-lg p-4">
-                    <p className="text-sm text-muted-foreground">Quantidade de pagamentos</p>
+                    <p className="text-sm text-muted-foreground">{t("admin_paid_count","Quantidade de pagamentos")}</p>
                     <p className="font-heading text-2xl mt-1">
                       {financialLoading ? "..." : (financialSummary?.paidAppointmentsCount ?? 0)}
                     </p>
                   </div>
                   <div className="glass rounded-lg p-4">
-                    <p className="text-sm text-muted-foreground">Receita bruta</p>
+                    <p className="text-sm text-muted-foreground">{t("admin_gross_revenue","Receita bruta")}</p>
                     <p className="font-heading text-2xl mt-1">
                       {financialLoading ? "..." : formatMoney(financialSummary?.paidAppointmentsRevenue ?? 0)}
                     </p>
                   </div>
                   <div className="glass rounded-lg p-4">
-                    <p className="text-sm text-muted-foreground">Gastos fixos</p>
+                    <p className="text-sm text-muted-foreground">{t("admin_fixed_expenses","Gastos fixos")}</p>
                     <p className="font-heading text-2xl mt-1">
                       {financialLoading ? "..." : formatMoney(financialSummary?.fixedExpensesTotal ?? 0)}
                     </p>
                   </div>
                   <div className="glass rounded-lg p-4">
-                    <p className="text-sm text-muted-foreground">Gastos variaveis</p>
+                    <p className="text-sm text-muted-foreground">{t("admin_variable_expenses","Gastos variaveis")}</p>
                     <p className="font-heading text-2xl mt-1">
                       {financialLoading ? "..." : formatMoney(financialSummary?.variableExpensesTotal ?? 0)}
                     </p>
                   </div>
                   <div className="glass rounded-lg p-4">
-                    <p className="text-sm text-muted-foreground">Lucro liquido</p>
+                    <p className="text-sm text-muted-foreground">{t("admin_net_profit","Lucro liquido")}</p>
                     <p
                       className={`font-heading text-2xl mt-1 ${(financialSummary?.netProfit ?? 0) >= 0 ? "text-green-400" : "text-destructive"}`}
                     >
@@ -1769,14 +1771,14 @@ const AdminDashboard = () => {
 
                 {financialError && (
                   <div className="glass rounded-lg p-4 border border-destructive/40">
-                    <p className="font-semibold text-destructive">Erro ao carregar resumo financeiro</p>
+                    <p className="font-semibold text-destructive">{t("admin_error_load_financial","Erro ao carregar resumo financeiro")}</p>
                     <p className="text-sm text-muted-foreground mt-1">{financialError}</p>
                     <Button
                       variant="outline"
                       className="mt-3"
                       onClick={() => loadFinancialSummary(appliedStartDate, appliedEndDate)}
                     >
-                      Tentar novamente
+                      {t("admin_retry","Tentar novamente")}
                     </Button>
                   </div>
                 )}
@@ -1784,12 +1786,12 @@ const AdminDashboard = () => {
                 <section className="glass rounded-lg p-4 md:p-5">
                   <div className="flex items-center gap-2 mb-4">
                     <Landmark className="h-5 w-5 text-primary" />
-                    <h2 className="font-heading text-xl font-semibold">Gastos fixos mensais</h2>
+                    <h2 className="font-heading text-xl font-semibold">{t("admin_fixed_monthly","Gastos fixos mensais")}</h2>
                   </div>
 
                   <form onSubmit={handleCreateFixedExpense} className="grid grid-cols-1 md:grid-cols-2 gap-3 mb-5">
                     <Input
-                      placeholder="Titulo do gasto fixo"
+                      placeholder={t("admin_fixed_title_placeholder","Titulo do gasto fixo")}
                       value={fixedTitle}
                       onChange={(event) => setFixedTitle(event.target.value)}
                       required
@@ -1804,16 +1806,16 @@ const AdminDashboard = () => {
                       required
                     />
                     <div>
-                      <label className="block text-xs text-muted-foreground mb-1">Inicio</label>
+                      <label className="block text-xs text-muted-foreground mb-1">{t("admin_start_date","Inicio")}</label>
                       <Input type="date" value={fixedStartsOn} onChange={(event) => setFixedStartsOn(event.target.value)} required />
                     </div>
                     <div>
-                      <label className="block text-xs text-muted-foreground mb-1">Fim (opcional)</label>
+                      <label className="block text-xs text-muted-foreground mb-1">{t("admin_end_date_optional","Fim (opcional)")}</label>
                       <Input type="date" value={fixedEndsOn} onChange={(event) => setFixedEndsOn(event.target.value)} />
                     </div>
                     <div className="md:col-span-2">
                       <Textarea
-                        placeholder="Observacoes (opcional)"
+                        placeholder={t("admin_notes_placeholder","Observacoes (opcional)")}
                         value={fixedNotes}
                         onChange={(event) => setFixedNotes(event.target.value)}
                         className="min-h-20"
@@ -1826,25 +1828,25 @@ const AdminDashboard = () => {
                         onChange={(event) => setFixedIsActive(event.target.checked)}
                         className="h-4 w-4"
                       />
-                      Gasto ativo
+                      {t("admin_expense_active","Gasto ativo")}
                     </label>
                     <Button type="submit" disabled={fixedSubmitting} className="md:w-fit">
-                      {fixedSubmitting ? "Salvando..." : "Cadastrar gasto fixo"}
+                      {fixedSubmitting ? t("admin_saving","Salvando...") : t("admin_register_fixed","Cadastrar gasto fixo")}
                     </Button>
                   </form>
 
                   {fixedError ? (
                     <div className="rounded-md border border-destructive/40 p-3">
-                      <p className="text-destructive font-semibold">Erro ao carregar gastos fixos</p>
+                      <p className="text-destructive font-semibold">{t("admin_error_load_fixed","Erro ao carregar gastos fixos")}</p>
                       <p className="text-sm text-muted-foreground mt-1">{fixedError}</p>
                       <Button variant="outline" className="mt-3" onClick={loadFixedExpenses}>
-                        Tentar novamente
+                        {t("admin_retry","Tentar novamente")}
                       </Button>
                     </div>
                   ) : fixedLoading ? (
-                    <p className="text-sm text-muted-foreground">Carregando gastos fixos...</p>
+                    <p className="text-sm text-muted-foreground">{t("admin_loading","Carregando...")}</p>
                   ) : fixedExpenses.length === 0 ? (
-                    <p className="text-sm text-muted-foreground">Nenhum gasto fixo cadastrado.</p>
+                    <p className="text-sm text-muted-foreground">{t("admin_no_fixed","Nenhum gasto fixo cadastrado.")}</p>
                   ) : (
                     <div className="space-y-2">
                       {fixedExpenses.map((expense) => (
@@ -1852,7 +1854,7 @@ const AdminDashboard = () => {
                           <div>
                             <p className="font-medium">{expense.title}</p>
                             <p className="text-xs text-muted-foreground">
-                              Inicio: {formatDateBr(expense.startsOn)} · Fim: {formatDateBr(expense.endsOn)} · {expense.isActive ? "Ativo" : "Inativo"}
+                              {t("admin_start_prefix","Inicio")}: {formatDateBr(expense.startsOn)} · {t("admin_end_prefix","Fim")}: {formatDateBr(expense.endsOn)} · {expense.isActive ? t("admin_active","Ativo") : t("admin_inactive","Inativo")}
                             </p>
                             {expense.notes && <p className="text-xs text-muted-foreground mt-1">{expense.notes}</p>}
                           </div>
@@ -1865,7 +1867,7 @@ const AdminDashboard = () => {
                               disabled={fixedEditSaving}
                             >
                               <Pencil className="h-4 w-4 mr-1" />
-                              Editar
+                              {t("admin_edit","Editar")}
                             </Button>
                           </div>
                         </div>
@@ -1877,12 +1879,12 @@ const AdminDashboard = () => {
                 <section className="glass rounded-lg p-4 md:p-5">
                   <div className="flex items-center gap-2 mb-4">
                     <Wallet className="h-5 w-5 text-primary" />
-                    <h2 className="font-heading text-xl font-semibold">Gastos variaveis</h2>
+                    <h2 className="font-heading text-xl font-semibold">{t("admin_variable_title","Gastos variaveis")}</h2>
                   </div>
 
                   <form onSubmit={handleCreateVariableExpense} className="grid grid-cols-1 md:grid-cols-2 gap-3 mb-5">
                     <Input
-                      placeholder="Titulo do gasto variavel"
+                      placeholder={t("admin_variable_title_placeholder","Titulo do gasto variavel")}
                       value={variableTitle}
                       onChange={(event) => setVariableTitle(event.target.value)}
                       required
@@ -1897,7 +1899,7 @@ const AdminDashboard = () => {
                       required
                     />
                     <div>
-                      <label className="block text-xs text-muted-foreground mb-1">Data da despesa</label>
+                      <label className="block text-xs text-muted-foreground mb-1">{t("admin_expense_date","Data da despesa")}</label>
                       <Input
                         type="date"
                         value={variableExpenseDate}
@@ -1914,31 +1916,31 @@ const AdminDashboard = () => {
                       />
                     </div>
                     <Button type="submit" disabled={variableSubmitting} className="md:w-fit">
-                      {variableSubmitting ? "Salvando..." : "Cadastrar gasto variavel"}
+                      {variableSubmitting ? t("admin_saving","Salvando...") : t("admin_register_variable","Cadastrar gasto variavel")}
                     </Button>
                   </form>
 
                   <div className="mb-3 text-sm text-muted-foreground flex items-center gap-2">
                     <TrendingUp className="h-4 w-4" />
-                    Gastos variaveis de {formatDateBr(appliedStartDate)} ate {formatDateBr(appliedEndDate)}
+                    {t("admin_variable_period","Gastos variaveis de")} {formatDateBr(appliedStartDate)} {t("admin_to","ate")} {formatDateBr(appliedEndDate)}
                   </div>
 
                   {variableError ? (
                     <div className="rounded-md border border-destructive/40 p-3">
-                      <p className="text-destructive font-semibold">Erro ao carregar gastos variaveis</p>
+                      <p className="text-destructive font-semibold">{t("admin_error_load_variable","Erro ao carregar gastos variaveis")}</p>
                       <p className="text-sm text-muted-foreground mt-1">{variableError}</p>
                       <Button
                         variant="outline"
                         className="mt-3"
                         onClick={() => loadVariableExpenses(appliedStartDate, appliedEndDate)}
                       >
-                        Tentar novamente
+                        {t("admin_retry","Tentar novamente")}
                       </Button>
                     </div>
                   ) : variableLoading ? (
-                    <p className="text-sm text-muted-foreground">Carregando gastos variaveis...</p>
+                    <p className="text-sm text-muted-foreground">{t("admin_loading","Carregando...")}</p>
                   ) : variableExpenses.length === 0 ? (
-                    <p className="text-sm text-muted-foreground">Nenhum gasto variavel neste periodo.</p>
+                    <p className="text-sm text-muted-foreground">{t("admin_no_variable","Nenhum gasto variavel neste periodo.")}</p>
                   ) : (
                     <div className="space-y-2">
                       {variableExpenses.map((expense) => (
@@ -1957,7 +1959,7 @@ const AdminDashboard = () => {
                               disabled={variableEditSaving}
                             >
                               <Pencil className="h-4 w-4 mr-1" />
-                              Editar
+                              {t("admin_edit","Editar")}
                             </Button>
                           </div>
                         </div>
