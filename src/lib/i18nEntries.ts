@@ -234,6 +234,7 @@ export const UI_TRANSLATION_ENTRIES_IT: TranslationEntries = {
   admin_no_variable: "Nessuna spesa variabile in questo periodo.",
   admin_variable_period: "Spese variabili dal",
   admin_to: "al",
+  admin_reason_past_slot: "Orario passato nella giornata",
 };
 
 export const UI_TRANSLATION_ENTRIES_PT: TranslationEntries = {
@@ -470,6 +471,7 @@ export const UI_TRANSLATION_ENTRIES_PT: TranslationEntries = {
   admin_no_variable: "Nenhum gasto variavel neste periodo.",
   admin_variable_period: "Gastos variaveis de",
   admin_to: "ate",
+  admin_reason_past_slot: "Horario passado no dia atual",
 };
 
 export const UI_TRANSLATION_ENTRIES_EN: TranslationEntries = {
@@ -706,6 +708,7 @@ export const UI_TRANSLATION_ENTRIES_EN: TranslationEntries = {
   admin_no_variable: "No variable expenses in this period.",
   admin_variable_period: "Variable expenses from",
   admin_to: "to",
+  admin_reason_past_slot: "Past slot in the current day",
 };
 
 export const UI_TRANSLATION_ENTRIES_ES: TranslationEntries = {
@@ -942,4 +945,5 @@ export const UI_TRANSLATION_ENTRIES_ES: TranslationEntries = {
   admin_no_variable: "Ningun gasto variable en este periodo.",
   admin_variable_period: "Gastos variables de",
   admin_to: "al",
+  admin_reason_past_slot: "Horario pasado en el dia actual",
 };

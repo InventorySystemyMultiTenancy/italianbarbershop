@@ -81,7 +81,9 @@ function isValidTimeFormat(value: string) {
   return HH_MM_REGEX.test(String(value || "").trim());
 }
 
-function getAgendaSlotVisualStatus(slot: AppointmentSlot): "disponivel" | "reservado" | "desabilitado" {
+function getAgendaSlotVisualStatus(
+  slot: AppointmentSlot,
+): "disponivel" | "reservado" | "desabilitado" {
   if (slot.status === "desabilitado") return "desabilitado";
   if (slot.status === "agendado" || slot.status === "pago") return "reservado";
   return "disponivel";
@@ -94,10 +96,21 @@ function getAgendaSlotVisualLabel(slot: AppointmentSlot) {
   return "disponivel";
 }
 
-function getDiscountPriceDetails(input: { base?: number; final?: number; percent?: number; fallback: number }) {
-  const final = Number.isFinite(input.final as number) ? Number(input.final) : input.fallback;
-  const baseFromRaw = Number.isFinite(input.base as number) ? Number(input.base) : undefined;
-  const percent = Number.isFinite(input.percent as number) ? Number(input.percent) : undefined;
+function getDiscountPriceDetails(input: {
+  base?: number;
+  final?: number;
+  percent?: number;
+  fallback: number;
+}) {
+  const final = Number.isFinite(input.final as number)
+    ? Number(input.final)
+    : input.fallback;
+  const baseFromRaw = Number.isFinite(input.base as number)
+    ? Number(input.base)
+    : undefined;
+  const percent = Number.isFinite(input.percent as number)
+    ? Number(input.percent)
+    : undefined;
 
   if (baseFromRaw !== undefined) {
     return { base: baseFromRaw, final };
@@ -119,7 +132,10 @@ function normalizeServiceToken(value?: string) {
     .replace(/[^a-z0-9]/g, "");
 }
 
-function isBirthdayOnAppointmentDate(birthDate?: string, appointmentDate?: string) {
+function isBirthdayOnAppointmentDate(
+  birthDate?: string,
+  appointmentDate?: string,
+) {
   if (!birthDate || !appointmentDate) return false;
 
   const birth = birthDate.slice(0, 10).split("-");
@@ -131,10 +147,18 @@ function isBirthdayOnAppointmentDate(birthDate?: string, appointmentDate?: strin
 
 function hasBirthdayDiscountInferred(appointment: Appointment) {
   const service = normalizeServiceToken(appointment.serviceType);
-  return isBirthdayOnAppointmentDate(appointment.birthDate, appointment.appointmentDate) && service === "corte";
+  return (
+    isBirthdayOnAppointmentDate(
+      appointment.birthDate,
+      appointment.appointmentDate,
+    ) && service === "corte"
+  );
 }
 
-function findBaseServicePrice(serviceType: string | undefined, servicesPriceMap: Record<string, number>) {
+function findBaseServicePrice(
+  serviceType: string | undefined,
+  servicesPriceMap: Record<string, number>,
+) {
   const normalizedType = normalizeServiceToken(serviceType);
   if (!normalizedType) return undefined;
 
@@ -142,7 +166,11 @@ function findBaseServicePrice(serviceType: string | undefined, servicesPriceMap:
   if (typeof direct === "number") return direct;
 
   for (const [key, price] of Object.entries(servicesPriceMap)) {
-    if (normalizedType === key || normalizedType.includes(key) || key.includes(normalizedType)) {
+    if (
+      normalizedType === key ||
+      normalizedType.includes(key) ||
+      key.includes(normalizedType)
+    ) {
       return price;
     }
   }
@@ -153,7 +181,10 @@ function findBaseServicePrice(serviceType: string | undefined, servicesPriceMap:
 function getCurrentPeriod() {
   const now = new Date();
   return {
-    startDate: format(new Date(now.getFullYear(), now.getMonth(), 1), "yyyy-MM-dd"),
+    startDate: format(
+      new Date(now.getFullYear(), now.getMonth(), 1),
+      "yyyy-MM-dd",
+    ),
     endDate: format(now, "yyyy-MM-dd"),
   };
 }
@@ -177,8 +208,10 @@ function toServiceLabel(appointment: Appointment) {
 }
 
 const AdminDashboard = () => {
-    const defaultPlanBackUrl =
-      typeof window !== "undefined" ? `${window.location.origin}/assinatura/sucesso` : "";
+  const defaultPlanBackUrl =
+    typeof window !== "undefined"
+      ? `${window.location.origin}/assinatura/sucesso`
+      : "";
 
   const { user, isAdmin, loading: authLoading } = useAuth();
   const { t } = useLanguage();
@@ -187,18 +220,29 @@ const AdminDashboard = () => {
 
   const [activeTab, setActiveTab] = useState("agenda");
   const [appointments, setAppointments] = useState<Appointment[]>([]);
-  const [servicesPriceMap, setServicesPriceMap] = useState<Record<string, number>>({});
+  const [servicesPriceMap, setServicesPriceMap] = useState<
+    Record<string, number>
+  >({});
   const [loading, setLoading] = useState(true);
-  const [filterDate, setFilterDate] = useState(format(new Date(), "yyyy-MM-dd"));
+  const [filterDate, setFilterDate] = useState(
+    format(new Date(), "yyyy-MM-dd"),
+  );
 
-  const [filterStartDate, setFilterStartDate] = useState(currentPeriod.startDate);
+  const [filterStartDate, setFilterStartDate] = useState(
+    currentPeriod.startDate,
+  );
   const [filterEndDate, setFilterEndDate] = useState(currentPeriod.endDate);
-  const [appliedStartDate, setAppliedStartDate] = useState(currentPeriod.startDate);
+  const [appliedStartDate, setAppliedStartDate] = useState(
+    currentPeriod.startDate,
+  );
   const [appliedEndDate, setAppliedEndDate] = useState(currentPeriod.endDate);
 
-  const [financialSummary, setFinancialSummary] = useState<FinancialReport | null>(null);
+  const [financialSummary, setFinancialSummary] =
+    useState<FinancialReport | null>(null);
   const [fixedExpenses, setFixedExpenses] = useState<FixedExpense[]>([]);
-  const [variableExpenses, setVariableExpenses] = useState<VariableExpense[]>([]);
+  const [variableExpenses, setVariableExpenses] = useState<VariableExpense[]>(
+    [],
+  );
 
   const [financialLoading, setFinancialLoading] = useState(false);
   const [fixedLoading, setFixedLoading] = useState(false);
@@ -212,8 +256,10 @@ const AdminDashboard = () => {
 
   const [fixedSubmitting, setFixedSubmitting] = useState(false);
   const [variableSubmitting, setVariableSubmitting] = useState(false);
-  const [editingFixedExpense, setEditingFixedExpense] = useState<FixedExpense | null>(null);
-  const [editingVariableExpense, setEditingVariableExpense] = useState<VariableExpense | null>(null);
+  const [editingFixedExpense, setEditingFixedExpense] =
+    useState<FixedExpense | null>(null);
+  const [editingVariableExpense, setEditingVariableExpense] =
+    useState<VariableExpense | null>(null);
   const [fixedEditSaving, setFixedEditSaving] = useState(false);
   const [variableEditSaving, setVariableEditSaving] = useState(false);
 
@@ -226,7 +272,9 @@ const AdminDashboard = () => {
 
   const [variableTitle, setVariableTitle] = useState("");
   const [variableAmount, setVariableAmount] = useState("");
-  const [variableExpenseDate, setVariableExpenseDate] = useState(currentPeriod.endDate);
+  const [variableExpenseDate, setVariableExpenseDate] = useState(
+    currentPeriod.endDate,
+  );
   const [variableNotes, setVariableNotes] = useState("");
 
   const [barbers, setBarbers] = useState<Barber[]>([]);
@@ -238,24 +286,32 @@ const AdminDashboard = () => {
   const [editingBarberId, setEditingBarberId] = useState<string | null>(null);
 
   const [agendaLoading, setAgendaLoading] = useState(false);
-  const [agendaSlotsByBarber, setAgendaSlotsByBarber] = useState<Record<string, AppointmentSlot[]>>({});
+  const [agendaSlotsByBarber, setAgendaSlotsByBarber] = useState<
+    Record<string, AppointmentSlot[]>
+  >({});
   const [dayHours, setDayHours] = useState<DayHour[]>([]);
   const [newDayHourTime, setNewDayHourTime] = useState("");
   const [newDayHourReason, setNewDayHourReason] = useState("");
   const [dayHourSubmitting, setDayHourSubmitting] = useState(false);
 
-  const [subscriptionPlans, setSubscriptionPlans] = useState<SubscriptionPlan[]>([]);
+  const [subscriptionPlans, setSubscriptionPlans] = useState<
+    SubscriptionPlan[]
+  >([]);
   const [plansLoading, setPlansLoading] = useState(false);
   const [plansError, setPlansError] = useState<string | null>(null);
   const [planSubmitting, setPlanSubmitting] = useState(false);
-  const [planToggleLoadingRef, setPlanToggleLoadingRef] = useState<string | null>(null);
+  const [planToggleLoadingRef, setPlanToggleLoadingRef] = useState<
+    string | null
+  >(null);
 
   const [subscribers, setSubscribers] = useState<AdminSubscriber[]>([]);
   const [subscribersLoading, setSubscribersLoading] = useState(false);
   const [subscribersError, setSubscribersError] = useState<string | null>(null);
 
   const [planName, setPlanName] = useState("Plano Mensal");
-  const [planDescription, setPlanDescription] = useState("Assinatura mensal premium");
+  const [planDescription, setPlanDescription] = useState(
+    "Assinatura mensal premium",
+  );
   const [planAmount, setPlanAmount] = useState("29.90");
 
   useEffect(() => {
@@ -264,8 +320,14 @@ const AdminDashboard = () => {
     }
   }, [user, isAdmin, authLoading, navigate]);
 
-  const handleAdminApiError = (error: unknown, options?: { onForbidden?: () => void; silentToast?: boolean }) => {
-    if (error instanceof ApiClientError && (error.status === 401 || error.status === 403)) {
+  const handleAdminApiError = (
+    error: unknown,
+    options?: { onForbidden?: () => void; silentToast?: boolean },
+  ) => {
+    if (
+      error instanceof ApiClientError &&
+      (error.status === 401 || error.status === 403)
+    ) {
       if (error.status === 401) {
         if (!options?.silentToast) {
           toast({
@@ -395,7 +457,12 @@ const AdminDashboard = () => {
       setFinancialSummary(data);
       setReportsForbidden(false);
     } catch (error) {
-      if (handleAdminApiError(error, { onForbidden: () => setReportsForbidden(true), silentToast: true })) {
+      if (
+        handleAdminApiError(error, {
+          onForbidden: () => setReportsForbidden(true),
+          silentToast: true,
+        })
+      ) {
         setFinancialError("Sem permissao para consultar relatorio financeiro.");
       } else {
         setFinancialError(getFriendlyErrorMessage(error));
@@ -414,7 +481,12 @@ const AdminDashboard = () => {
       setFixedExpenses(data);
       setReportsForbidden(false);
     } catch (error) {
-      if (handleAdminApiError(error, { onForbidden: () => setReportsForbidden(true), silentToast: true })) {
+      if (
+        handleAdminApiError(error, {
+          onForbidden: () => setReportsForbidden(true),
+          silentToast: true,
+        })
+      ) {
         setFixedError("Sem permissao para listar gastos fixos.");
       } else {
         setFixedError(getFriendlyErrorMessage(error));
@@ -433,7 +505,12 @@ const AdminDashboard = () => {
       setVariableExpenses(data);
       setReportsForbidden(false);
     } catch (error) {
-      if (handleAdminApiError(error, { onForbidden: () => setReportsForbidden(true), silentToast: true })) {
+      if (
+        handleAdminApiError(error, {
+          onForbidden: () => setReportsForbidden(true),
+          silentToast: true,
+        })
+      ) {
         setVariableError("Sem permissao para listar gastos variaveis.");
       } else {
         setVariableError(getFriendlyErrorMessage(error));
@@ -444,7 +521,10 @@ const AdminDashboard = () => {
   };
 
   const reloadReportsByPeriod = async (startDate: string, endDate: string) => {
-    await Promise.allSettled([loadFinancialSummary(startDate, endDate), loadVariableExpenses(startDate, endDate)]);
+    await Promise.allSettled([
+      loadFinancialSummary(startDate, endDate),
+      loadVariableExpenses(startDate, endDate),
+    ]);
   };
 
   useEffect(() => {
@@ -515,15 +595,25 @@ const AdminDashboard = () => {
     }
 
     const barberScoped = dayHours.find(
-      (item) => item.date === filterDate && item.time === slot.time && item.barberId && item.barberId === barberId,
+      (item) =>
+        item.date === filterDate &&
+        item.time === slot.time &&
+        item.barberId &&
+        item.barberId === barberId,
     );
     if (barberScoped) return barberScoped;
 
-    return dayHours.find((item) => item.date === filterDate && item.time === slot.time && !item.barberId);
+    return dayHours.find(
+      (item) =>
+        item.date === filterDate && item.time === slot.time && !item.barberId,
+    );
   };
 
   const refreshAgendaData = async () => {
-    await Promise.allSettled([loadAppointments(), loadAgendaByDate(filterDate, barbers)]);
+    await Promise.allSettled([
+      loadAppointments(),
+      loadAgendaByDate(filterDate, barbers),
+    ]);
   };
 
   const handleCreateDayHour = async (event: FormEvent) => {
@@ -569,7 +659,10 @@ const AdminDashboard = () => {
     }
   };
 
-  const handleToggleDaySlot = async (barberId: string, slot: AppointmentSlot) => {
+  const handleToggleDaySlot = async (
+    barberId: string,
+    slot: AppointmentSlot,
+  ) => {
     const visualStatus = getAgendaSlotVisualStatus(slot);
     const override = findSlotOverride(slot, barberId);
 
@@ -588,22 +681,32 @@ const AdminDashboard = () => {
         if (!override) {
           toast({
             title: "Override nao encontrado",
-            description: "Esse slot esta desabilitado, mas sem override associado para reativar.",
+            description:
+              "Esse slot esta desabilitado, mas sem override associado para reativar.",
             variant: "destructive",
           });
           return;
         }
 
-        await updateAdminDayHour(override.id, { isEnabled: true, reason: undefined });
+        await updateAdminDayHour(override.id, {
+          isEnabled: true,
+          reason: undefined,
+        });
         toast({
           title: "Horario reativado",
           description: `Horario ${slot.time} reativado com sucesso.`,
         });
       } else {
-        const confirmed = window.confirm("Deseja desativar este horario manualmente?");
+        const confirmed = window.confirm(
+          "Deseja desativar este horario manualmente?",
+        );
         if (!confirmed) return;
 
-        const reasonInput = window.prompt("Motivo da desativacao (opcional):", override?.reason || "") || "";
+        const reasonInput =
+          window.prompt(
+            "Motivo da desativacao (opcional):",
+            override?.reason || "",
+          ) || "";
         const reason = reasonInput.trim() || undefined;
 
         if (override) {
@@ -776,7 +879,9 @@ const AdminDashboard = () => {
 
   const updateStatus = async (id: string, status: AppointmentStatus) => {
     if (status === "disponivel") {
-      const confirmed = window.confirm("Deseja liberar este horario e deixá-lo disponivel novamente?");
+      const confirmed = window.confirm(
+        "Deseja liberar este horario e deixá-lo disponivel novamente?",
+      );
       if (!confirmed) return;
     }
 
@@ -796,7 +901,9 @@ const AdminDashboard = () => {
   };
 
   const removeAppointment = async (id: string) => {
-    const confirmed = window.confirm("Deseja excluir este agendamento? Essa acao nao pode ser desfeita.");
+    const confirmed = window.confirm(
+      "Deseja excluir este agendamento? Essa acao nao pode ser desfeita.",
+    );
     if (!confirmed) return;
 
     try {
@@ -838,7 +945,8 @@ const AdminDashboard = () => {
     if (!opened) {
       toast({
         title: "Nao foi possivel abrir o WhatsApp",
-        description: "Verifique se o navegador bloqueou pop-up e tente novamente.",
+        description:
+          "Verifique se o navegador bloqueou pop-up e tente novamente.",
         variant: "destructive",
       });
       return;
@@ -851,8 +959,12 @@ const AdminDashboard = () => {
   };
 
   const totals = useMemo(() => {
-    const totalAgendado = appointments.filter((appointment) => appointment.status === "agendado").length;
-    const totalPago = appointments.filter((appointment) => appointment.status === "pago").length;
+    const totalAgendado = appointments.filter(
+      (appointment) => appointment.status === "agendado",
+    ).length;
+    const totalPago = appointments.filter(
+      (appointment) => appointment.status === "pago",
+    ).length;
     const faturamento = appointments
       .filter((appointment) => appointment.status === "pago")
       .reduce((sum, appointment) => sum + (appointment.price || 0), 0);
@@ -899,7 +1011,12 @@ const AdminDashboard = () => {
     event.preventDefault();
 
     const amount = Number(fixedAmount);
-    if (!fixedTitle.trim() || !Number.isFinite(amount) || amount <= 0 || !fixedStartsOn) {
+    if (
+      !fixedTitle.trim() ||
+      !Number.isFinite(amount) ||
+      amount <= 0 ||
+      !fixedStartsOn
+    ) {
       toast({
         title: "Dados invalidos",
         description: "Preencha titulo, valor maior que zero e data inicial.",
@@ -911,7 +1028,8 @@ const AdminDashboard = () => {
     if (fixedEndsOn && fixedStartsOn > fixedEndsOn) {
       toast({
         title: "Periodo invalido",
-        description: "A data final do gasto fixo deve ser maior ou igual a data inicial.",
+        description:
+          "A data final do gasto fixo deve ser maior ou igual a data inicial.",
         variant: "destructive",
       });
       return;
@@ -935,9 +1053,17 @@ const AdminDashboard = () => {
       setFixedNotes("");
       setFixedIsActive(true);
 
-      await Promise.allSettled([loadFixedExpenses(), loadFinancialSummary(appliedStartDate, appliedEndDate)]);
+      await Promise.allSettled([
+        loadFixedExpenses(),
+        loadFinancialSummary(appliedStartDate, appliedEndDate),
+      ]);
     } catch (error) {
-      if (handleAdminApiError(error, { onForbidden: () => setReportsForbidden(true) })) return;
+      if (
+        handleAdminApiError(error, {
+          onForbidden: () => setReportsForbidden(true),
+        })
+      )
+        return;
 
       toast({
         title: "Erro ao cadastrar gasto fixo",
@@ -953,7 +1079,12 @@ const AdminDashboard = () => {
     event.preventDefault();
 
     const amount = Number(variableAmount);
-    if (!variableTitle.trim() || !Number.isFinite(amount) || amount <= 0 || !variableExpenseDate) {
+    if (
+      !variableTitle.trim() ||
+      !Number.isFinite(amount) ||
+      amount <= 0 ||
+      !variableExpenseDate
+    ) {
       toast({
         title: "Dados invalidos",
         description: "Preencha titulo, valor maior que zero e data da despesa.",
@@ -982,7 +1113,12 @@ const AdminDashboard = () => {
         loadFinancialSummary(appliedStartDate, appliedEndDate),
       ]);
     } catch (error) {
-      if (handleAdminApiError(error, { onForbidden: () => setReportsForbidden(true) })) return;
+      if (
+        handleAdminApiError(error, {
+          onForbidden: () => setReportsForbidden(true),
+        })
+      )
+        return;
 
       toast({
         title: "Erro ao cadastrar gasto variavel",
@@ -994,7 +1130,9 @@ const AdminDashboard = () => {
     }
   };
 
-  const handleUpdateFixedExpense = async (payload: Parameters<typeof updateAdminFixedExpense>[1]) => {
+  const handleUpdateFixedExpense = async (
+    payload: Parameters<typeof updateAdminFixedExpense>[1],
+  ) => {
     if (!editingFixedExpense?.id) return;
 
     setFixedEditSaving(true);
@@ -1007,9 +1145,17 @@ const AdminDashboard = () => {
       });
 
       setEditingFixedExpense(null);
-      await Promise.allSettled([loadFixedExpenses(), loadFinancialSummary(appliedStartDate, appliedEndDate)]);
+      await Promise.allSettled([
+        loadFixedExpenses(),
+        loadFinancialSummary(appliedStartDate, appliedEndDate),
+      ]);
     } catch (error) {
-      if (handleAdminApiError(error, { onForbidden: () => setReportsForbidden(true) })) return;
+      if (
+        handleAdminApiError(error, {
+          onForbidden: () => setReportsForbidden(true),
+        })
+      )
+        return;
 
       toast({
         title: "Erro ao atualizar gasto fixo",
@@ -1021,7 +1167,9 @@ const AdminDashboard = () => {
     }
   };
 
-  const handleUpdateVariableExpense = async (payload: Parameters<typeof updateAdminVariableExpense>[1]) => {
+  const handleUpdateVariableExpense = async (
+    payload: Parameters<typeof updateAdminVariableExpense>[1],
+  ) => {
     if (!editingVariableExpense?.id) return;
 
     setVariableEditSaving(true);
@@ -1039,7 +1187,12 @@ const AdminDashboard = () => {
         loadFinancialSummary(appliedStartDate, appliedEndDate),
       ]);
     } catch (error) {
-      if (handleAdminApiError(error, { onForbidden: () => setReportsForbidden(true) })) return;
+      if (
+        handleAdminApiError(error, {
+          onForbidden: () => setReportsForbidden(true),
+        })
+      )
+        return;
 
       toast({
         title: "Erro ao atualizar gasto variavel",
@@ -1103,7 +1256,8 @@ const AdminDashboard = () => {
     if (!reference) {
       toast({
         title: "Referencia invalida",
-        description: "Nao foi possivel identificar o plano para atualizar status.",
+        description:
+          "Nao foi possivel identificar o plano para atualizar status.",
         variant: "destructive",
       });
       return;
@@ -1133,7 +1287,9 @@ const AdminDashboard = () => {
   if (authLoading) {
     return (
       <div className="min-h-screen bg-background flex items-center justify-center">
-        <p className="text-muted-foreground">{t("booking_auth_loading","Carregando autenticacao...")}</p>
+        <p className="text-muted-foreground">
+          {t("booking_auth_loading", "Carregando autenticacao...")}
+        </p>
       </div>
     );
   }
@@ -1149,20 +1305,29 @@ const AdminDashboard = () => {
         <div className="flex items-center gap-3 mb-8">
           <Shield className="h-7 w-7 text-primary" />
           <h1 className="font-heading text-3xl font-bold">
-            {t("admin_title","PAINEL")} <span className="gold-text">{t("admin_title_b","ADMIN")}</span>
+            {t("admin_title", "PAINEL")}{" "}
+            <span className="gold-text">{t("admin_title_b", "ADMIN")}</span>
           </h1>
         </div>
 
         <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
           <TabsList className="w-full max-w-3xl grid grid-cols-5 mb-8">
-            <TabsTrigger value="agenda">{t("admin_tab_agenda","Agenda")}</TabsTrigger>
-            <TabsTrigger value="relatorios" className="gap-2">
-              <BarChart3 className="h-4 w-4" /> {t("admin_tab_reports","Relatorios")}
+            <TabsTrigger value="agenda">
+              {t("admin_tab_agenda", "Agenda")}
             </TabsTrigger>
-            <TabsTrigger value="barbeiros">{t("admin_tab_barbers","Barbeiros")}</TabsTrigger>
-            <TabsTrigger value="planos">{t("admin_tab_plans","Planos")}</TabsTrigger>
+            <TabsTrigger value="relatorios" className="gap-2">
+              <BarChart3 className="h-4 w-4" />{" "}
+              {t("admin_tab_reports", "Relatorios")}
+            </TabsTrigger>
+            <TabsTrigger value="barbeiros">
+              {t("admin_tab_barbers", "Barbeiros")}
+            </TabsTrigger>
+            <TabsTrigger value="planos">
+              {t("admin_tab_plans", "Planos")}
+            </TabsTrigger>
             <TabsTrigger value="assinantes" className="gap-2">
-              <Users className="h-4 w-4" /> {t("admin_tab_subscribers","Assinantes")}
+              <Users className="h-4 w-4" />{" "}
+              {t("admin_tab_subscribers", "Assinantes")}
             </TabsTrigger>
           </TabsList>
 
@@ -1170,18 +1335,30 @@ const AdminDashboard = () => {
             <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
               <div className="glass rounded-lg p-5 text-center">
                 <CalendarDays className="h-8 w-8 text-primary mx-auto mb-2" />
-                <p className="text-2xl font-heading font-bold">{appointments.length}</p>
-                <p className="text-sm text-muted-foreground">{t("admin_total_day","Total do dia")}</p>
+                <p className="text-2xl font-heading font-bold">
+                  {appointments.length}
+                </p>
+                <p className="text-sm text-muted-foreground">
+                  {t("admin_total_day", "Total do dia")}
+                </p>
               </div>
               <div className="glass rounded-lg p-5 text-center">
                 <CheckCircle className="h-8 w-8 text-green-400 mx-auto mb-2" />
-                <p className="text-2xl font-heading font-bold">{totals.totalPago}</p>
-                <p className="text-sm text-muted-foreground">{t("admin_cuts_paid","Cortes pagos")}</p>
+                <p className="text-2xl font-heading font-bold">
+                  {totals.totalPago}
+                </p>
+                <p className="text-sm text-muted-foreground">
+                  {t("admin_cuts_paid", "Cortes pagos")}
+                </p>
               </div>
               <div className="glass rounded-lg p-5 text-center">
                 <DollarSign className="h-8 w-8 text-primary mx-auto mb-2" />
-                <p className="text-2xl font-heading font-bold">{formatMoney(totals.faturamento)}</p>
-                <p className="text-sm text-muted-foreground">{t("admin_revenue","Faturamento")}</p>
+                <p className="text-2xl font-heading font-bold">
+                  {formatMoney(totals.faturamento)}
+                </p>
+                <p className="text-sm text-muted-foreground">
+                  {t("admin_revenue", "Faturamento")}
+                </p>
               </div>
             </div>
 
@@ -1197,12 +1374,23 @@ const AdminDashboard = () => {
             <section className="glass rounded-lg p-4 md:p-5 space-y-4">
               <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2">
                 <div>
-                  <h2 className="font-heading text-lg font-semibold">{t("admin_schedule_title","Grade de horarios por barbeiro")}</h2>
-                  <p className="text-xs text-muted-foreground">{t("admin_date_selected","Data selecionada")}: {formatDateBr(filterDate)}</p>
+                  <h2 className="font-heading text-lg font-semibold">
+                    {t(
+                      "admin_schedule_title",
+                      "Grade de horarios por barbeiro",
+                    )}
+                  </h2>
+                  <p className="text-xs text-muted-foreground">
+                    {t("admin_date_selected", "Data selecionada")}:{" "}
+                    {formatDateBr(filterDate)}
+                  </p>
                 </div>
               </div>
 
-              <form onSubmit={handleCreateDayHour} className="grid grid-cols-1 md:grid-cols-[160px_1fr_auto] gap-2 items-start">
+              <form
+                onSubmit={handleCreateDayHour}
+                className="grid grid-cols-1 md:grid-cols-[160px_1fr_auto] gap-2 items-start"
+              >
                 <Input
                   type="time"
                   value={newDayHourTime}
@@ -1213,18 +1401,32 @@ const AdminDashboard = () => {
                 <Input
                   value={newDayHourReason}
                   onChange={(event) => setNewDayHourReason(event.target.value)}
-                  placeholder={t("admin_reason_placeholder","Motivo opcional")}
+                  placeholder={t("admin_reason_placeholder", "Motivo opcional")}
                   maxLength={120}
                 />
-                <Button type="submit" className="gap-1" disabled={dayHourSubmitting}>
-                  <Plus className="h-4 w-4" /> {dayHourSubmitting ? t("admin_saving","Salvando...") : t("admin_create_slot","Criar horario no dia")}
+                <Button
+                  type="submit"
+                  className="gap-1"
+                  disabled={dayHourSubmitting}
+                >
+                  <Plus className="h-4 w-4" />{" "}
+                  {dayHourSubmitting
+                    ? t("admin_saving", "Salvando...")
+                    : t("admin_create_slot", "Criar horario no dia")}
                 </Button>
               </form>
 
               {agendaLoading ? (
-                <p className="text-sm text-muted-foreground">{t("admin_loading_schedule","Carregando grade do dia...")}</p>
+                <p className="text-sm text-muted-foreground">
+                  {t("admin_loading_schedule", "Carregando grade do dia...")}
+                </p>
               ) : barbers.filter((barber) => barber.isActive).length === 0 ? (
-                <p className="text-sm text-muted-foreground">{t("admin_no_active_barbers","Nenhum barbeiro ativo para exibir a grade.")}</p>
+                <p className="text-sm text-muted-foreground">
+                  {t(
+                    "admin_no_active_barbers",
+                    "Nenhum barbeiro ativo para exibir a grade.",
+                  )}
+                </p>
               ) : (
                 <div className="space-y-4">
                   {barbers
@@ -1233,20 +1435,36 @@ const AdminDashboard = () => {
                       const slots = agendaSlotsByBarber[barber.id] || [];
 
                       return (
-                        <div key={barber.id} className="rounded-md border border-border/70 p-3 space-y-3">
+                        <div
+                          key={barber.id}
+                          className="rounded-md border border-border/70 p-3 space-y-3"
+                        >
                           <div className="flex items-center justify-between gap-2">
                             <p className="font-medium">{barber.fullName}</p>
-                            <p className="text-xs text-muted-foreground">{slots.length} {t("admin_slots_count","horarios")}</p>
+                            <p className="text-xs text-muted-foreground">
+                              {slots.length}{" "}
+                              {t("admin_slots_count", "horarios")}
+                            </p>
                           </div>
 
                           {slots.length === 0 ? (
-                            <p className="text-sm text-muted-foreground">{t("admin_no_slots_barber","Sem slots para este barbeiro nesta data.")}</p>
+                            <p className="text-sm text-muted-foreground">
+                              {t(
+                                "admin_no_slots_barber",
+                                "Sem slots para este barbeiro nesta data.",
+                              )}
+                            </p>
                           ) : (
                             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-2">
                               {slots.map((slot) => {
-                                const visualStatus = getAgendaSlotVisualStatus(slot);
-                                const visualLabel = getAgendaSlotVisualLabel(slot);
-                                const override = findSlotOverride(slot, barber.id);
+                                const visualStatus =
+                                  getAgendaSlotVisualStatus(slot);
+                                const visualLabel =
+                                  getAgendaSlotVisualLabel(slot);
+                                const override = findSlotOverride(
+                                  slot,
+                                  barber.id,
+                                );
                                 const reason = slot.reason || override?.reason;
                                 const statusClass =
                                   visualStatus === "desabilitado"
@@ -1256,14 +1474,45 @@ const AdminDashboard = () => {
                                       : "bg-green-500/20 text-green-500";
 
                                 return (
-                                  <div key={`${barber.id}-${slot.time}-${slot.status}-${slot.dayHourOverrideId || "na"}`} className="rounded-md border border-border/70 bg-card p-3">
+                                  <div
+                                    key={`${barber.id}-${slot.time}-${slot.status}-${slot.dayHourOverrideId || "na"}`}
+                                    className="rounded-md border border-border/70 bg-card p-3"
+                                  >
                                     <div className="flex items-center justify-between gap-2">
-                                      <p className="font-heading font-semibold text-base">{slot.time.slice(0, 5)}</p>
-                                      <span className={`text-[11px] px-2 py-0.5 rounded-full ${statusClass}`}>{visualLabel}</span>
+                                      <p className="font-heading font-semibold text-base">
+                                        {slot.time.slice(0, 5)}
+                                      </p>
+                                      <span
+                                        className={`text-[11px] px-2 py-0.5 rounded-full ${statusClass}`}
+                                      >
+                                        {visualStatus === "desabilitado"
+                                          ? t(
+                                              "booking_slot_disabled",
+                                              "desabilitado",
+                                            )
+                                          : visualStatus === "reservado"
+                                            ? t(
+                                                "booking_slot_scheduled",
+                                                "reservado",
+                                              )
+                                            : t(
+                                                "booking_slot_available",
+                                                "disponivel",
+                                              )}
+                                      </span>
                                     </div>
 
                                     {reason && (
-                                      <p className="text-xs text-muted-foreground mt-2 min-h-8">{t("admin_reason_prefix","Motivo")}: {reason}</p>
+                                      <p className="text-xs text-muted-foreground mt-2 min-h-8">
+                                        {t("admin_reason_prefix", "Motivo")}:{" "}
+                                        {reason ===
+                                        "Horario passado no dia atual"
+                                          ? t(
+                                              "admin_reason_past_slot",
+                                              "Horario passado no dia atual",
+                                            )
+                                          : reason}
+                                      </p>
                                     )}
 
                                     <div className="mt-2 flex flex-col sm:flex-row gap-2">
@@ -1271,11 +1520,18 @@ const AdminDashboard = () => {
                                         size="sm"
                                         type="button"
                                         variant="outline"
-                                        disabled={dayHourSubmitting || visualStatus === "reservado"}
-                                        onClick={() => handleToggleDaySlot(barber.id, slot)}
+                                        disabled={
+                                          dayHourSubmitting ||
+                                          visualStatus === "reservado"
+                                        }
+                                        onClick={() =>
+                                          handleToggleDaySlot(barber.id, slot)
+                                        }
                                         className="w-full"
                                       >
-                                        {visualStatus === "desabilitado" ? t("admin_reactivate","Reativar") : t("admin_deactivate","Desativar")}
+                                        {visualStatus === "desabilitado"
+                                          ? t("admin_reactivate", "Reativar")
+                                          : t("admin_deactivate", "Desativar")}
                                       </Button>
 
                                       {override && (
@@ -1284,10 +1540,17 @@ const AdminDashboard = () => {
                                           type="button"
                                           variant="outline"
                                           disabled={dayHourSubmitting}
-                                          onClick={() => handleDeleteDayHourOverride(override.id)}
+                                          onClick={() =>
+                                            handleDeleteDayHourOverride(
+                                              override.id,
+                                            )
+                                          }
                                           className="w-full text-destructive border-destructive/30 hover:bg-destructive/10"
                                         >
-                                          {t("admin_remove_override","Remover override")}
+                                          {t(
+                                            "admin_remove_override",
+                                            "Remover override",
+                                          )}
                                         </Button>
                                       )}
                                     </div>
@@ -1304,14 +1567,20 @@ const AdminDashboard = () => {
             </section>
 
             {loading ? (
-              <p className="text-muted-foreground text-center py-12">{t("admin_loading","Carregando...")}</p>
+              <p className="text-muted-foreground text-center py-12">
+                {t("admin_loading", "Carregando...")}
+              </p>
             ) : appointments.length === 0 ? (
               <div className="text-center py-16 glass rounded-lg">
-                <p className="text-muted-foreground">{t("admin_no_appointments","Nenhum agendamento nesta data")}</p>
+                <p className="text-muted-foreground">
+                  {t("admin_no_appointments", "Nenhum agendamento nesta data")}
+                </p>
               </div>
             ) : (
               <div className="space-y-3">
-                <h2 className="font-heading text-lg font-semibold">{t("admin_client_schedule_title","Horarios de clientes")}</h2>
+                <h2 className="font-heading text-lg font-semibold">
+                  {t("admin_client_schedule_title", "Horarios de clientes")}
+                </h2>
                 {appointments.map((appointment) => {
                   const statusClass =
                     appointment.status === "pago"
@@ -1319,28 +1588,45 @@ const AdminDashboard = () => {
                       : appointment.status === "agendado"
                         ? "bg-primary/20 text-primary"
                         : "bg-muted text-muted-foreground";
-                  const birthdayDiscountInferred = !appointment.discount?.applied && hasBirthdayDiscountInferred(appointment);
-                  const baseServicePrice = findBaseServicePrice(appointment.serviceType, servicesPriceMap);
+                  const birthdayDiscountInferred =
+                    !appointment.discount?.applied &&
+                    hasBirthdayDiscountInferred(appointment);
+                  const baseServicePrice = findBaseServicePrice(
+                    appointment.serviceType,
+                    servicesPriceMap,
+                  );
                   const isHalfPriceInferred =
                     !appointment.discount?.applied &&
                     baseServicePrice !== undefined &&
                     baseServicePrice > 0 &&
-                    Math.abs((appointment.price ?? 0) - baseServicePrice * 0.5) < 0.01;
-                  const shouldShowBirthdayBadge = Boolean(appointment.discount?.applied || birthdayDiscountInferred || isHalfPriceInferred);
-                  const badgePercent = appointment.discount?.discountPercent || ((birthdayDiscountInferred || isHalfPriceInferred) ? 50 : undefined);
+                    Math.abs(
+                      (appointment.price ?? 0) - baseServicePrice * 0.5,
+                    ) < 0.01;
+                  const shouldShowBirthdayBadge = Boolean(
+                    appointment.discount?.applied ||
+                    birthdayDiscountInferred ||
+                    isHalfPriceInferred,
+                  );
+                  const badgePercent =
+                    appointment.discount?.discountPercent ||
+                    (birthdayDiscountInferred || isHalfPriceInferred
+                      ? 50
+                      : undefined);
                   const prices = getDiscountPriceDetails({
                     base: appointment.discount?.basePrice,
                     final: appointment.discount?.finalPrice,
                     percent: appointment.discount?.discountPercent,
                     fallback: appointment.price ?? 0,
                   });
-                  const inferredFinalPrice = birthdayDiscountInferred || isHalfPriceInferred ? (appointment.price ?? 0) : prices.final;
-                  const inferredOriginalPrice =
-                    birthdayDiscountInferred
-                      ? (appointment.price ?? 0) * 2
-                      : isHalfPriceInferred
-                        ? (baseServicePrice ?? prices.base)
-                        : prices.base;
+                  const inferredFinalPrice =
+                    birthdayDiscountInferred || isHalfPriceInferred
+                      ? (appointment.price ?? 0)
+                      : prices.final;
+                  const inferredOriginalPrice = birthdayDiscountInferred
+                    ? (appointment.price ?? 0) * 2
+                    : isHalfPriceInferred
+                      ? (baseServicePrice ?? prices.base)
+                      : prices.base;
                   const subscriberByAppointmentUserId = appointment.userId
                     ? premiumSubscribersByUserId.get(String(appointment.userId))
                     : undefined;
@@ -1350,67 +1636,126 @@ const AdminDashboard = () => {
                     isCanceled: appointment.subscriptionIsCanceled,
                     subscriptionState: appointment.subscriptionState,
                   });
-                  const subscriberState = subscriberByAppointmentUserId ? getSubscriptionState(subscriberByAppointmentUserId) : null;
-                  const isPremiumSubscriber = Boolean(appointmentSubscriptionState.isActive || subscriberState?.isActive);
+                  const subscriberState = subscriberByAppointmentUserId
+                    ? getSubscriptionState(subscriberByAppointmentUserId)
+                    : null;
+                  const isPremiumSubscriber = Boolean(
+                    appointmentSubscriptionState.isActive ||
+                    subscriberState?.isActive,
+                  );
                   const subscriptionPlanName =
-                    appointment.subscriptionPlanName || subscriberByAppointmentUserId?.planName || "Plano premium";
+                    appointment.subscriptionPlanName ||
+                    subscriberByAppointmentUserId?.planName ||
+                    "Plano premium";
 
                   return (
                     <div key={appointment.id} className="glass rounded-lg p-4">
                       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
                         <div className="flex-1">
                           <div className="flex flex-wrap items-center gap-2 mb-1">
-                            <span className="font-heading font-semibold text-lg">{appointment.appointmentTime.slice(0, 5)}</span>
-                            <span className={`text-xs px-2 py-0.5 rounded-full ${statusClass}`}>{appointment.status}</span>
+                            <span className="font-heading font-semibold text-lg">
+                              {appointment.appointmentTime.slice(0, 5)}
+                            </span>
+                            <span
+                              className={`text-xs px-2 py-0.5 rounded-full ${statusClass}`}
+                            >
+                              {appointment.status}
+                            </span>
                             {shouldShowBirthdayBadge && (
                               <span className="text-[11px] px-2 py-0.5 rounded-full bg-primary/20 text-primary border border-primary/30">
-                                ANIVERSARIO {badgePercent ? `${badgePercent}%` : "50%"}
+                                ANIVERSARIO{" "}
+                                {badgePercent ? `${badgePercent}%` : "50%"}
                               </span>
                             )}
                           </div>
                           <div className="flex flex-wrap items-center gap-2">
-                            <p className="text-sm text-foreground">{t("admin_client_label","Cliente")}: {appointment.fullName || t("admin_no_name","Sem nome")}</p>
+                            <p className="text-sm text-foreground">
+                              {t("admin_client_label", "Cliente")}:{" "}
+                              {appointment.fullName ||
+                                t("admin_no_name", "Sem nome")}
+                            </p>
                             {isPremiumSubscriber && (
                               <span className="text-[11px] px-2 py-0.5 rounded-full bg-green-500/20 text-green-400 border border-green-500/40">
-                                {t("admin_premium_subscriber","Assinante premium")}
+                                {t(
+                                  "admin_premium_subscriber",
+                                  "Assinante premium",
+                                )}
                               </span>
                             )}
                             <Button
                               size="sm"
                               variant="outline"
-                              onClick={() => sendWhatsappConfirmation(appointment)}
+                              onClick={() =>
+                                sendWhatsappConfirmation(appointment)
+                              }
                               className="h-8 px-2 gap-1 text-green-400 border-green-500/40 hover:bg-green-500/10 w-full sm:w-auto"
                             >
-                              <MessageCircle className="h-3.5 w-3.5" /> {t("admin_confirm_whatsapp","Confirmar via WhatsApp")}
+                              <MessageCircle className="h-3.5 w-3.5" />{" "}
+                              {t(
+                                "admin_confirm_whatsapp",
+                                "Confirmar via WhatsApp",
+                              )}
                             </Button>
                           </div>
                           {isPremiumSubscriber && (
-                            <p className="text-xs text-green-400">{t("admin_plan_label","Plano")}: {subscriptionPlanName}</p>
+                            <p className="text-xs text-green-400">
+                              {t("admin_plan_label", "Plano")}:{" "}
+                              {subscriptionPlanName}
+                            </p>
                           )}
-                          <p className="text-sm text-foreground">{t("admin_service_label","Servico")}: {toServiceLabel(appointment)}</p>
-                          <p className="text-sm text-foreground">{t("admin_value_label","Valor")}: {formatMoney(appointment.price || 0)}</p>
+                          <p className="text-sm text-foreground">
+                            {t("admin_service_label", "Servico")}:{" "}
+                            {toServiceLabel(appointment)}
+                          </p>
+                          <p className="text-sm text-foreground">
+                            {t("admin_value_label", "Valor")}:{" "}
+                            {formatMoney(appointment.price || 0)}
+                          </p>
                           {shouldShowBirthdayBadge && (
                             <div className="mt-1 rounded-md border border-primary/40 bg-primary/10 p-2">
-                              <p className="text-xs font-semibold text-primary">{t("admin_birthday_discount","Desconto de aniversario aplicado")}</p>
+                              <p className="text-xs font-semibold text-primary">
+                                {t(
+                                  "admin_birthday_discount",
+                                  "Desconto de aniversario aplicado",
+                                )}
+                              </p>
                               {appointment.discount?.message && (
-                                <p className="text-xs text-muted-foreground">{appointment.discount.message}</p>
+                                <p className="text-xs text-muted-foreground">
+                                  {appointment.discount.message}
+                                </p>
                               )}
-                              {birthdayDiscountInferred && !appointment.discount?.applied && (
-                                <p className="text-xs text-muted-foreground">{t("admin_birthday_inferred","Desconto inferido pela data de aniversario e servico corte.")}</p>
-                              )}
-                              {isHalfPriceInferred && !birthdayDiscountInferred && !appointment.discount?.applied && (
-                                <p className="text-xs text-muted-foreground">{t("admin_birthday_inferred_diff","Desconto inferido pela diferenca entre preco base e preco cobrado.")}</p>
-                              )}
+                              {birthdayDiscountInferred &&
+                                !appointment.discount?.applied && (
+                                  <p className="text-xs text-muted-foreground">
+                                    {t(
+                                      "admin_birthday_inferred",
+                                      "Desconto inferido pela data de aniversario e servico corte.",
+                                    )}
+                                  </p>
+                                )}
+                              {isHalfPriceInferred &&
+                                !birthdayDiscountInferred &&
+                                !appointment.discount?.applied && (
+                                  <p className="text-xs text-muted-foreground">
+                                    {t(
+                                      "admin_birthday_inferred_diff",
+                                      "Desconto inferido pela diferenca entre preco base e preco cobrado.",
+                                    )}
+                                  </p>
+                                )}
                               <p className="text-xs text-foreground">
-                                {t("admin_original_price","Original")}: {formatMoney(inferredOriginalPrice)}
+                                {t("admin_original_price", "Original")}:{" "}
+                                {formatMoney(inferredOriginalPrice)}
                               </p>
                               <p className="text-xs text-foreground">
-                                {t("admin_final_price","Final")}: {formatMoney(inferredFinalPrice)}
+                                {t("admin_final_price", "Final")}:{" "}
+                                {formatMoney(inferredFinalPrice)}
                               </p>
                             </div>
                           )}
                           <p className="text-xs text-muted-foreground">
-                            {appointment.phone || "-"} · {appointment.email || "-"}
+                            {appointment.phone || "-"} ·{" "}
+                            {appointment.email || "-"}
                           </p>
                         </div>
                         <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2 w-full sm:w-auto">
@@ -1418,10 +1763,13 @@ const AdminDashboard = () => {
                             <Button
                               size="sm"
                               variant="outline"
-                              onClick={() => updateStatus(appointment.id, "pago")}
+                              onClick={() =>
+                                updateStatus(appointment.id, "pago")
+                              }
                               className="text-green-400 border-green-400/30 hover:bg-green-400/10 gap-1 w-full sm:w-auto justify-center"
                             >
-                              <CheckCircle className="h-3 w-3" /> {t("admin_btn_paid","Pago")}
+                              <CheckCircle className="h-3 w-3" />{" "}
+                              {t("admin_btn_paid", "Pago")}
                             </Button>
                           )}
 
@@ -1429,10 +1777,13 @@ const AdminDashboard = () => {
                             <Button
                               size="sm"
                               variant="outline"
-                              onClick={() => updateStatus(appointment.id, "disponivel")}
+                              onClick={() =>
+                                updateStatus(appointment.id, "disponivel")
+                              }
                               className="gap-1 w-full sm:w-auto justify-center"
                             >
-                              <RotateCcw className="h-3 w-3" /> {t("admin_btn_release","Liberar horario")}
+                              <RotateCcw className="h-3 w-3" />{" "}
+                              {t("admin_btn_release", "Liberar horario")}
                             </Button>
                           )}
 
@@ -1442,7 +1793,8 @@ const AdminDashboard = () => {
                             onClick={() => removeAppointment(appointment.id)}
                             className="text-destructive border-destructive/30 hover:bg-destructive/10 gap-1 w-full sm:w-auto justify-center"
                           >
-                            <Trash2 className="h-3 w-3" /> {t("admin_btn_delete","Excluir agendamento")}
+                            <Trash2 className="h-3 w-3" />{" "}
+                            {t("admin_btn_delete", "Excluir agendamento")}
                           </Button>
                         </div>
                       </div>
@@ -1455,38 +1807,66 @@ const AdminDashboard = () => {
 
           <TabsContent value="barbeiros" className="space-y-6">
             <section className="glass rounded-lg p-4 md:p-5">
-              <h2 className="font-heading text-xl font-semibold mb-4">{t("admin_manage_barbers","Gerenciar barbeiros")}</h2>
+              <h2 className="font-heading text-xl font-semibold mb-4">
+                {t("admin_manage_barbers", "Gerenciar barbeiros")}
+              </h2>
 
               <form onSubmit={handleSubmitBarber} className="space-y-3 mb-5">
                 <Input
-                  placeholder={t("admin_barber_name_placeholder","Nome do barbeiro")}
+                  placeholder={t(
+                    "admin_barber_name_placeholder",
+                    "Nome do barbeiro",
+                  )}
                   value={barberName}
                   onChange={(event) => setBarberName(event.target.value)}
                   required
                 />
 
                 <Input
-                  placeholder={t("admin_image_url_placeholder","URL da imagem (opcional)")}
+                  placeholder={t(
+                    "admin_image_url_placeholder",
+                    "URL da imagem (opcional)",
+                  )}
                   value={barberImageUrl}
                   onChange={(event) => setBarberImageUrl(event.target.value)}
                 />
 
                 <div>
-                  <label className="block text-xs text-muted-foreground mb-1">{t("admin_upload_image","Ou envie uma imagem")}</label>
-                  <Input type="file" accept="image/*" onChange={(event) => handleImageUpload(event.target.files?.[0] || null)} />
+                  <label className="block text-xs text-muted-foreground mb-1">
+                    {t("admin_upload_image", "Ou envie uma imagem")}
+                  </label>
+                  <Input
+                    type="file"
+                    accept="image/*"
+                    onChange={(event) =>
+                      handleImageUpload(event.target.files?.[0] || null)
+                    }
+                  />
                 </div>
 
                 {barberImageUrl && (
-                  <img src={barberImageUrl} alt="Preview do barbeiro" className="h-20 w-20 rounded-full object-cover border border-border" />
+                  <img
+                    src={barberImageUrl}
+                    alt="Preview do barbeiro"
+                    className="h-20 w-20 rounded-full object-cover border border-border"
+                  />
                 )}
 
                 <div className="flex flex-col sm:flex-row gap-2">
                   <Button type="submit" disabled={barberSubmitting}>
-                    {barberSubmitting ? t("admin_saving","Salvando...") : editingBarberId ? t("admin_update_barber","Atualizar barbeiro") : t("admin_register_barber","Cadastrar barbeiro")}
+                    {barberSubmitting
+                      ? t("admin_saving", "Salvando...")
+                      : editingBarberId
+                        ? t("admin_update_barber", "Atualizar barbeiro")
+                        : t("admin_register_barber", "Cadastrar barbeiro")}
                   </Button>
                   {editingBarberId && (
-                    <Button type="button" variant="outline" onClick={resetBarberForm}>
-                      {t("admin_cancel_edit","Cancelar edicao")}
+                    <Button
+                      type="button"
+                      variant="outline"
+                      onClick={resetBarberForm}
+                    >
+                      {t("admin_cancel_edit", "Cancelar edicao")}
                     </Button>
                   )}
                 </div>
@@ -1494,38 +1874,75 @@ const AdminDashboard = () => {
 
               {barbersError ? (
                 <div className="rounded-md border border-destructive/40 p-3">
-                  <p className="text-destructive font-semibold">{t("admin_error_load_barbers","Erro ao carregar barbeiros")}</p>
-                  <p className="text-sm text-muted-foreground mt-1">{barbersError}</p>
-                  <Button variant="outline" className="mt-3" onClick={loadAdminBarbers}>
-                    {t("admin_retry","Tentar novamente")}
+                  <p className="text-destructive font-semibold">
+                    {t(
+                      "admin_error_load_barbers",
+                      "Erro ao carregar barbeiros",
+                    )}
+                  </p>
+                  <p className="text-sm text-muted-foreground mt-1">
+                    {barbersError}
+                  </p>
+                  <Button
+                    variant="outline"
+                    className="mt-3"
+                    onClick={loadAdminBarbers}
+                  >
+                    {t("admin_retry", "Tentar novamente")}
                   </Button>
                 </div>
               ) : barbersLoading ? (
-                <p className="text-sm text-muted-foreground">{t("admin_loading","Carregando...")}</p>
+                <p className="text-sm text-muted-foreground">
+                  {t("admin_loading", "Carregando...")}
+                </p>
               ) : barbers.length === 0 ? (
-                <p className="text-sm text-muted-foreground">{t("admin_no_barbers","Nenhum barbeiro cadastrado.")}</p>
+                <p className="text-sm text-muted-foreground">
+                  {t("admin_no_barbers", "Nenhum barbeiro cadastrado.")}
+                </p>
               ) : (
                 <div className="space-y-2">
                   {barbers.map((barber) => (
-                    <div key={barber.id} className="rounded-md border border-border/70 p-3 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2">
+                    <div
+                      key={barber.id}
+                      className="rounded-md border border-border/70 p-3 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2"
+                    >
                       <div className="flex items-center gap-3">
                         {barber.imageUrl ? (
-                          <img src={barber.imageUrl} alt={barber.fullName} className="h-12 w-12 rounded-full object-cover border border-border" />
+                          <img
+                            src={barber.imageUrl}
+                            alt={barber.fullName}
+                            className="h-12 w-12 rounded-full object-cover border border-border"
+                          />
                         ) : (
-                          <div className="h-12 w-12 rounded-full border border-border bg-muted flex items-center justify-center text-xs">{t("admin_no_photo","Sem foto")}</div>
+                          <div className="h-12 w-12 rounded-full border border-border bg-muted flex items-center justify-center text-xs">
+                            {t("admin_no_photo", "Sem foto")}
+                          </div>
                         )}
                         <div>
                           <p className="font-medium">{barber.fullName}</p>
-                          <p className="text-xs text-muted-foreground">{barber.isActive ? t("admin_active","Ativo") : t("admin_inactive","Inativo")}</p>
+                          <p className="text-xs text-muted-foreground">
+                            {barber.isActive
+                              ? t("admin_active", "Ativo")
+                              : t("admin_inactive", "Inativo")}
+                          </p>
                         </div>
                       </div>
 
                       <div className="flex flex-col sm:flex-row gap-2">
-                        <Button type="button" variant="outline" onClick={() => startEditBarber(barber)}>
-                          {t("admin_edit","Editar")}
+                        <Button
+                          type="button"
+                          variant="outline"
+                          onClick={() => startEditBarber(barber)}
+                        >
+                          {t("admin_edit", "Editar")}
                         </Button>
                         {barber.isActive && (
-                          <Button type="button" variant="outline" className="text-destructive border-destructive/30 hover:bg-destructive/10" onClick={() => handleDeactivateBarber(barber.id)}>
+                          <Button
+                            type="button"
+                            variant="outline"
+                            className="text-destructive border-destructive/30 hover:bg-destructive/10"
+                            onClick={() => handleDeactivateBarber(barber.id)}
+                          >
                             Inativar
                           </Button>
                         )}
@@ -1539,19 +1956,30 @@ const AdminDashboard = () => {
 
           <TabsContent value="planos" className="space-y-6">
             <section className="glass rounded-lg p-4 md:p-5 space-y-4">
-              <h2 className="font-heading text-xl font-semibold">{t("admin_new_plan","Novo plano mensal")}</h2>
+              <h2 className="font-heading text-xl font-semibold">
+                {t("admin_new_plan", "Novo plano mensal")}
+              </h2>
 
-              <form onSubmit={handleCreateSubscriptionPlan} className="space-y-3">
+              <form
+                onSubmit={handleCreateSubscriptionPlan}
+                className="space-y-3"
+              >
                 <Input
                   value={planName}
                   onChange={(event) => setPlanName(event.target.value)}
-                  placeholder={t("admin_plan_name_placeholder","Nome do plano")}
+                  placeholder={t(
+                    "admin_plan_name_placeholder",
+                    "Nome do plano",
+                  )}
                   required
                 />
                 <Textarea
                   value={planDescription}
                   onChange={(event) => setPlanDescription(event.target.value)}
-                  placeholder={t("admin_plan_desc_placeholder","Descricao do plano")}
+                  placeholder={t(
+                    "admin_plan_desc_placeholder",
+                    "Descricao do plano",
+                  )}
                   rows={2}
                 />
                 <Input
@@ -1560,69 +1988,128 @@ const AdminDashboard = () => {
                   step="0.01"
                   value={planAmount}
                   onChange={(event) => setPlanAmount(event.target.value)}
-                  placeholder={t("admin_plan_amount_placeholder","Valor mensal")}
+                  placeholder={t(
+                    "admin_plan_amount_placeholder",
+                    "Valor mensal",
+                  )}
                   required
                 />
 
                 <Button type="submit" disabled={planSubmitting}>
-                  {planSubmitting ? t("admin_creating_plan","Criando plano...") : t("admin_create_plan","Criar plano mensal")}
+                  {planSubmitting
+                    ? t("admin_creating_plan", "Criando plano...")
+                    : t("admin_create_plan", "Criar plano mensal")}
                 </Button>
               </form>
             </section>
 
             <section className="glass rounded-lg p-4 md:p-5 space-y-4">
-              <h2 className="font-heading text-xl font-semibold">{t("admin_registered_plans","Planos cadastrados")}</h2>
+              <h2 className="font-heading text-xl font-semibold">
+                {t("admin_registered_plans", "Planos cadastrados")}
+              </h2>
 
               {plansError ? (
                 <div className="rounded-md border border-destructive/40 p-3">
-                  <p className="text-destructive font-semibold">{t("admin_error_load_plans","Erro ao carregar planos")}</p>
-                  <p className="text-sm text-muted-foreground mt-1">{plansError}</p>
-                  <Button variant="outline" className="mt-3" onClick={loadAdminSubscriptionPlans}>
-                    {t("admin_retry","Tentar novamente")}
+                  <p className="text-destructive font-semibold">
+                    {t("admin_error_load_plans", "Erro ao carregar planos")}
+                  </p>
+                  <p className="text-sm text-muted-foreground mt-1">
+                    {plansError}
+                  </p>
+                  <Button
+                    variant="outline"
+                    className="mt-3"
+                    onClick={loadAdminSubscriptionPlans}
+                  >
+                    {t("admin_retry", "Tentar novamente")}
                   </Button>
                 </div>
               ) : plansLoading ? (
-                <p className="text-sm text-muted-foreground">{t("admin_loading","Carregando...")}</p>
+                <p className="text-sm text-muted-foreground">
+                  {t("admin_loading", "Carregando...")}
+                </p>
               ) : subscriptionPlans.length === 0 ? (
-                <p className="text-sm text-muted-foreground">{t("admin_no_plans","Nenhum plano cadastrado.")}</p>
+                <p className="text-sm text-muted-foreground">
+                  {t("admin_no_plans", "Nenhum plano cadastrado.")}
+                </p>
               ) : (
                 <div className="overflow-x-auto">
                   <table className="w-full text-sm">
                     <thead>
                       <tr className="border-b border-border/70 text-left text-muted-foreground">
-                        <th className="py-2 pr-3">{t("admin_col_name","Nome")}</th>
-                        <th className="py-2 pr-3">{t("admin_col_description","Descricao")}</th>
-                        <th className="py-2 pr-3">{t("admin_col_value","Valor")}</th>
-                        <th className="py-2 pr-3">{t("admin_col_frequency","Frequencia")}</th>
-                        <th className="py-2 pr-3">{t("admin_col_currency","Moeda")}</th>
+                        <th className="py-2 pr-3">
+                          {t("admin_col_name", "Nome")}
+                        </th>
+                        <th className="py-2 pr-3">
+                          {t("admin_col_description", "Descricao")}
+                        </th>
+                        <th className="py-2 pr-3">
+                          {t("admin_col_value", "Valor")}
+                        </th>
+                        <th className="py-2 pr-3">
+                          {t("admin_col_frequency", "Frequencia")}
+                        </th>
+                        <th className="py-2 pr-3">
+                          {t("admin_col_currency", "Moeda")}
+                        </th>
                         <th className="py-2 pr-3">preapproval_plan_id</th>
-                        <th className="py-2 pr-3">{t("admin_col_active","Ativo")}</th>
-                        <th className="py-2">{t("admin_col_action","Acao")}</th>
+                        <th className="py-2 pr-3">
+                          {t("admin_col_active", "Ativo")}
+                        </th>
+                        <th className="py-2">
+                          {t("admin_col_action", "Acao")}
+                        </th>
                       </tr>
                     </thead>
                     <tbody>
                       {subscriptionPlans.map((plan) => {
-                        const reference = String(plan.preapprovalPlanId || plan.id || "");
+                        const reference = String(
+                          plan.preapprovalPlanId || plan.id || "",
+                        );
                         const isToggling = planToggleLoadingRef === reference;
 
                         return (
-                          <tr key={reference || plan.id} className="border-b border-border/40 align-top">
+                          <tr
+                            key={reference || plan.id}
+                            className="border-b border-border/40 align-top"
+                          >
                             <td className="py-2 pr-3">{plan.name || "-"}</td>
-                            <td className="py-2 pr-3">{plan.description || "-"}</td>
-                            <td className="py-2 pr-3">{formatMoney(plan.transactionAmount || 0)}</td>
-                            <td className="py-2 pr-3">{plan.frequency || "-"} {plan.frequencyType || "-"}</td>
-                            <td className="py-2 pr-3">{plan.currencyId || "BRL"}</td>
-                            <td className="py-2 pr-3 break-all">{plan.preapprovalPlanId || plan.id}</td>
-                            <td className="py-2 pr-3">{plan.isActive ? t("admin_yes","Sim") : t("admin_no","Nao")}</td>
+                            <td className="py-2 pr-3">
+                              {plan.description || "-"}
+                            </td>
+                            <td className="py-2 pr-3">
+                              {formatMoney(plan.transactionAmount || 0)}
+                            </td>
+                            <td className="py-2 pr-3">
+                              {plan.frequency || "-"}{" "}
+                              {plan.frequencyType || "-"}
+                            </td>
+                            <td className="py-2 pr-3">
+                              {plan.currencyId || "BRL"}
+                            </td>
+                            <td className="py-2 pr-3 break-all">
+                              {plan.preapprovalPlanId || plan.id}
+                            </td>
+                            <td className="py-2 pr-3">
+                              {plan.isActive
+                                ? t("admin_yes", "Sim")
+                                : t("admin_no", "Nao")}
+                            </td>
                             <td className="py-2">
                               <Button
                                 type="button"
                                 size="sm"
                                 variant="outline"
                                 disabled={isToggling}
-                                onClick={() => handleToggleSubscriptionPlan(plan)}
+                                onClick={() =>
+                                  handleToggleSubscriptionPlan(plan)
+                                }
                               >
-                                {isToggling ? t("admin_updating","Atualizando...") : plan.isActive ? t("admin_inactivate","Inativar") : t("admin_activate","Ativar")}
+                                {isToggling
+                                  ? t("admin_updating", "Atualizando...")
+                                  : plan.isActive
+                                    ? t("admin_inactivate", "Inativar")
+                                    : t("admin_activate", "Ativar")}
                               </Button>
                             </td>
                           </tr>
@@ -1639,37 +2126,70 @@ const AdminDashboard = () => {
             <section className="glass rounded-lg p-4 md:p-5 space-y-4">
               <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2">
                 <div>
-                  <h2 className="font-heading text-xl font-semibold">{t("admin_premium_subscribers","Assinantes premium")}</h2>
-                  <p className="text-xs text-muted-foreground">{t("admin_subscribers_desc","Usuarios com assinatura ativa ou pendente.")}</p>
+                  <h2 className="font-heading text-xl font-semibold">
+                    {t("admin_premium_subscribers", "Assinantes premium")}
+                  </h2>
+                  <p className="text-xs text-muted-foreground">
+                    {t(
+                      "admin_subscribers_desc",
+                      "Usuarios com assinatura ativa ou pendente.",
+                    )}
+                  </p>
                 </div>
-                <Button variant="outline" onClick={loadAdminSubscribers} disabled={subscribersLoading}>
-                  {subscribersLoading ? t("admin_refreshing","Atualizando...") : t("admin_refresh_list","Atualizar lista")}
+                <Button
+                  variant="outline"
+                  onClick={loadAdminSubscribers}
+                  disabled={subscribersLoading}
+                >
+                  {subscribersLoading
+                    ? t("admin_refreshing", "Atualizando...")
+                    : t("admin_refresh_list", "Atualizar lista")}
                 </Button>
               </div>
 
               {subscribersError ? (
                 <div className="rounded-md border border-destructive/40 p-3">
-                  <p className="text-destructive font-semibold">{t("admin_error_load_subscribers","Erro ao carregar assinantes")}</p>
-                  <p className="text-sm text-muted-foreground mt-1">{subscribersError}</p>
+                  <p className="text-destructive font-semibold">
+                    {t(
+                      "admin_error_load_subscribers",
+                      "Erro ao carregar assinantes",
+                    )}
+                  </p>
+                  <p className="text-sm text-muted-foreground mt-1">
+                    {subscribersError}
+                  </p>
                 </div>
               ) : subscribersLoading ? (
-                <p className="text-sm text-muted-foreground">{t("admin_loading","Carregando...")}</p>
+                <p className="text-sm text-muted-foreground">
+                  {t("admin_loading", "Carregando...")}
+                </p>
               ) : subscribers.length === 0 ? (
-                <p className="text-sm text-muted-foreground">{t("admin_no_subscribers","Nenhum assinante premium encontrado.")}</p>
+                <p className="text-sm text-muted-foreground">
+                  {t(
+                    "admin_no_subscribers",
+                    "Nenhum assinante premium encontrado.",
+                  )}
+                </p>
               ) : (
                 <div className="overflow-x-auto">
                   <table className="w-full text-sm">
                     <thead>
                       <tr className="border-b border-border/70 text-left text-muted-foreground">
                         <th className="py-2 pr-3">Nome</th>
-                        <th className="py-2 pr-3">{t("admin_tab_plans","Plano")}</th>
-                        <th className="py-2 pr-3">{t("admin_col_status","Status")}</th>
+                        <th className="py-2 pr-3">
+                          {t("admin_tab_plans", "Plano")}
+                        </th>
+                        <th className="py-2 pr-3">
+                          {t("admin_col_status", "Status")}
+                        </th>
                         <th className="py-2 pr-3">Valor</th>
-                        <th className="py-2">{t("admin_col_contact","Contato")}</th>
+                        <th className="py-2">
+                          {t("admin_col_contact", "Contato")}
+                        </th>
                       </tr>
                     </thead>
                     <tbody>
-                      {subscribers.map((subscriber) => (
+                      {subscribers.map((subscriber) =>
                         (() => {
                           const state = getSubscriptionState(subscriber);
                           const badgeClass =
@@ -1680,28 +2200,44 @@ const AdminDashboard = () => {
                                 : "bg-muted text-muted-foreground border-border";
 
                           return (
-                            <tr key={`${subscriber.userId}-${subscriber.subscriptionId || subscriber.preapprovalPlanId || "-"}`} className="border-b border-border/40 align-top">
-                              <td className="py-2 pr-3">{subscriber.fullName || "Sem nome"}</td>
-                              <td className="py-2 pr-3">{subscriber.planName || "Plano premium"}</td>
+                            <tr
+                              key={`${subscriber.userId}-${subscriber.subscriptionId || subscriber.preapprovalPlanId || "-"}`}
+                              className="border-b border-border/40 align-top"
+                            >
+                              <td className="py-2 pr-3">
+                                {subscriber.fullName || "Sem nome"}
+                              </td>
+                              <td className="py-2 pr-3">
+                                {subscriber.planName || "Plano premium"}
+                              </td>
                               <td className="py-2 pr-3">
                                 <div className="flex flex-col gap-1">
-                                  <span className={`text-[11px] px-2 py-0.5 rounded-full border w-fit ${badgeClass}`}>
+                                  <span
+                                    className={`text-[11px] px-2 py-0.5 rounded-full border w-fit ${badgeClass}`}
+                                  >
                                     {state.label}
                                   </span>
-                                  <span className="text-xs text-muted-foreground">status: {subscriber.status || "-"}</span>
+                                  <span className="text-xs text-muted-foreground">
+                                    status: {subscriber.status || "-"}
+                                  </span>
                                 </div>
                               </td>
                               <td className="py-2 pr-3">
-                                {typeof subscriber.transactionAmount === "number" ? formatMoney(subscriber.transactionAmount) : "-"}
+                                {typeof subscriber.transactionAmount ===
+                                "number"
+                                  ? formatMoney(subscriber.transactionAmount)
+                                  : "-"}
                               </td>
                               <td className="py-2">
                                 {subscriber.phone || "-"}
-                                {subscriber.email ? ` • ${subscriber.email}` : ""}
+                                {subscriber.email
+                                  ? ` • ${subscriber.email}`
+                                  : ""}
                               </td>
                             </tr>
                           );
-                        })()
-                      ))}
+                        })(),
+                      )}
                     </tbody>
                   </table>
                 </div>
@@ -1713,72 +2249,139 @@ const AdminDashboard = () => {
             <section className="glass rounded-lg p-4 md:p-5">
               <div className="flex flex-col lg:flex-row lg:items-end gap-3">
                 <div className="w-full lg:w-auto">
-                  <label className="block text-sm text-muted-foreground mb-1">{t("admin_date_from","Data inicial")}</label>
-                  <Input type="date" value={filterStartDate} onChange={(event) => setFilterStartDate(event.target.value)} />
+                  <label className="block text-sm text-muted-foreground mb-1">
+                    {t("admin_date_from", "Data inicial")}
+                  </label>
+                  <Input
+                    type="date"
+                    value={filterStartDate}
+                    onChange={(event) => setFilterStartDate(event.target.value)}
+                  />
                 </div>
                 <div className="w-full lg:w-auto">
-                  <label className="block text-sm text-muted-foreground mb-1">{t("admin_date_to","Data final")}</label>
-                  <Input type="date" value={filterEndDate} onChange={(event) => setFilterEndDate(event.target.value)} />
+                  <label className="block text-sm text-muted-foreground mb-1">
+                    {t("admin_date_to", "Data final")}
+                  </label>
+                  <Input
+                    type="date"
+                    value={filterEndDate}
+                    onChange={(event) => setFilterEndDate(event.target.value)}
+                  />
                 </div>
-                <Button onClick={applyReportFilter} className="lg:mb-[1px]" disabled={financialLoading || variableLoading}>
-                  {t("admin_apply_filter","Aplicar filtro")}
+                <Button
+                  onClick={applyReportFilter}
+                  className="lg:mb-[1px]"
+                  disabled={financialLoading || variableLoading}
+                >
+                  {t("admin_apply_filter", "Aplicar filtro")}
                 </Button>
               </div>
             </section>
 
             {reportsForbidden ? (
               <div className="glass rounded-lg p-8 text-center">
-                <p className="font-heading text-lg">{t("admin_reports_no_permission","Sem permissao para acessar relatorios.")}</p>
-                <p className="text-sm text-muted-foreground mt-2">{t("admin_reports_relogin","Se o problema persistir, faca login novamente.")}</p>
-                <Button className="mt-4" variant="outline" onClick={() => navigate("/login")}>{t("admin_reports_login","Ir para login")}</Button>
+                <p className="font-heading text-lg">
+                  {t(
+                    "admin_reports_no_permission",
+                    "Sem permissao para acessar relatorios.",
+                  )}
+                </p>
+                <p className="text-sm text-muted-foreground mt-2">
+                  {t(
+                    "admin_reports_relogin",
+                    "Se o problema persistir, faca login novamente.",
+                  )}
+                </p>
+                <Button
+                  className="mt-4"
+                  variant="outline"
+                  onClick={() => navigate("/login")}
+                >
+                  {t("admin_reports_login", "Ir para login")}
+                </Button>
               </div>
             ) : (
               <>
                 <section className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-5 gap-4">
                   <div className="glass rounded-lg p-4">
-                    <p className="text-sm text-muted-foreground">{t("admin_paid_count","Quantidade de pagamentos")}</p>
+                    <p className="text-sm text-muted-foreground">
+                      {t("admin_paid_count", "Quantidade de pagamentos")}
+                    </p>
                     <p className="font-heading text-2xl mt-1">
-                      {financialLoading ? "..." : (financialSummary?.paidAppointmentsCount ?? 0)}
+                      {financialLoading
+                        ? "..."
+                        : (financialSummary?.paidAppointmentsCount ?? 0)}
                     </p>
                   </div>
                   <div className="glass rounded-lg p-4">
-                    <p className="text-sm text-muted-foreground">{t("admin_gross_revenue","Receita bruta")}</p>
+                    <p className="text-sm text-muted-foreground">
+                      {t("admin_gross_revenue", "Receita bruta")}
+                    </p>
                     <p className="font-heading text-2xl mt-1">
-                      {financialLoading ? "..." : formatMoney(financialSummary?.paidAppointmentsRevenue ?? 0)}
+                      {financialLoading
+                        ? "..."
+                        : formatMoney(
+                            financialSummary?.paidAppointmentsRevenue ?? 0,
+                          )}
                     </p>
                   </div>
                   <div className="glass rounded-lg p-4">
-                    <p className="text-sm text-muted-foreground">{t("admin_fixed_expenses","Gastos fixos")}</p>
+                    <p className="text-sm text-muted-foreground">
+                      {t("admin_fixed_expenses", "Gastos fixos")}
+                    </p>
                     <p className="font-heading text-2xl mt-1">
-                      {financialLoading ? "..." : formatMoney(financialSummary?.fixedExpensesTotal ?? 0)}
+                      {financialLoading
+                        ? "..."
+                        : formatMoney(
+                            financialSummary?.fixedExpensesTotal ?? 0,
+                          )}
                     </p>
                   </div>
                   <div className="glass rounded-lg p-4">
-                    <p className="text-sm text-muted-foreground">{t("admin_variable_expenses","Gastos variaveis")}</p>
+                    <p className="text-sm text-muted-foreground">
+                      {t("admin_variable_expenses", "Gastos variaveis")}
+                    </p>
                     <p className="font-heading text-2xl mt-1">
-                      {financialLoading ? "..." : formatMoney(financialSummary?.variableExpensesTotal ?? 0)}
+                      {financialLoading
+                        ? "..."
+                        : formatMoney(
+                            financialSummary?.variableExpensesTotal ?? 0,
+                          )}
                     </p>
                   </div>
                   <div className="glass rounded-lg p-4">
-                    <p className="text-sm text-muted-foreground">{t("admin_net_profit","Lucro liquido")}</p>
+                    <p className="text-sm text-muted-foreground">
+                      {t("admin_net_profit", "Lucro liquido")}
+                    </p>
                     <p
                       className={`font-heading text-2xl mt-1 ${(financialSummary?.netProfit ?? 0) >= 0 ? "text-green-400" : "text-destructive"}`}
                     >
-                      {financialLoading ? "..." : formatMoney(financialSummary?.netProfit ?? 0)}
+                      {financialLoading
+                        ? "..."
+                        : formatMoney(financialSummary?.netProfit ?? 0)}
                     </p>
                   </div>
                 </section>
 
                 {financialError && (
                   <div className="glass rounded-lg p-4 border border-destructive/40">
-                    <p className="font-semibold text-destructive">{t("admin_error_load_financial","Erro ao carregar resumo financeiro")}</p>
-                    <p className="text-sm text-muted-foreground mt-1">{financialError}</p>
+                    <p className="font-semibold text-destructive">
+                      {t(
+                        "admin_error_load_financial",
+                        "Erro ao carregar resumo financeiro",
+                      )}
+                    </p>
+                    <p className="text-sm text-muted-foreground mt-1">
+                      {financialError}
+                    </p>
                     <Button
                       variant="outline"
                       className="mt-3"
-                      onClick={() => loadFinancialSummary(appliedStartDate, appliedEndDate)}
+                      onClick={() =>
+                        loadFinancialSummary(appliedStartDate, appliedEndDate)
+                      }
                     >
-                      {t("admin_retry","Tentar novamente")}
+                      {t("admin_retry", "Tentar novamente")}
                     </Button>
                   </div>
                 )}
@@ -1786,12 +2389,20 @@ const AdminDashboard = () => {
                 <section className="glass rounded-lg p-4 md:p-5">
                   <div className="flex items-center gap-2 mb-4">
                     <Landmark className="h-5 w-5 text-primary" />
-                    <h2 className="font-heading text-xl font-semibold">{t("admin_fixed_monthly","Gastos fixos mensais")}</h2>
+                    <h2 className="font-heading text-xl font-semibold">
+                      {t("admin_fixed_monthly", "Gastos fixos mensais")}
+                    </h2>
                   </div>
 
-                  <form onSubmit={handleCreateFixedExpense} className="grid grid-cols-1 md:grid-cols-2 gap-3 mb-5">
+                  <form
+                    onSubmit={handleCreateFixedExpense}
+                    className="grid grid-cols-1 md:grid-cols-2 gap-3 mb-5"
+                  >
                     <Input
-                      placeholder={t("admin_fixed_title_placeholder","Titulo do gasto fixo")}
+                      placeholder={t(
+                        "admin_fixed_title_placeholder",
+                        "Titulo do gasto fixo",
+                      )}
                       value={fixedTitle}
                       onChange={(event) => setFixedTitle(event.target.value)}
                       required
@@ -1806,16 +2417,34 @@ const AdminDashboard = () => {
                       required
                     />
                     <div>
-                      <label className="block text-xs text-muted-foreground mb-1">{t("admin_start_date","Inicio")}</label>
-                      <Input type="date" value={fixedStartsOn} onChange={(event) => setFixedStartsOn(event.target.value)} required />
+                      <label className="block text-xs text-muted-foreground mb-1">
+                        {t("admin_start_date", "Inicio")}
+                      </label>
+                      <Input
+                        type="date"
+                        value={fixedStartsOn}
+                        onChange={(event) =>
+                          setFixedStartsOn(event.target.value)
+                        }
+                        required
+                      />
                     </div>
                     <div>
-                      <label className="block text-xs text-muted-foreground mb-1">{t("admin_end_date_optional","Fim (opcional)")}</label>
-                      <Input type="date" value={fixedEndsOn} onChange={(event) => setFixedEndsOn(event.target.value)} />
+                      <label className="block text-xs text-muted-foreground mb-1">
+                        {t("admin_end_date_optional", "Fim (opcional)")}
+                      </label>
+                      <Input
+                        type="date"
+                        value={fixedEndsOn}
+                        onChange={(event) => setFixedEndsOn(event.target.value)}
+                      />
                     </div>
                     <div className="md:col-span-2">
                       <Textarea
-                        placeholder={t("admin_notes_placeholder","Observacoes (opcional)")}
+                        placeholder={t(
+                          "admin_notes_placeholder",
+                          "Observacoes (opcional)",
+                        )}
                         value={fixedNotes}
                         onChange={(event) => setFixedNotes(event.target.value)}
                         className="min-h-20"
@@ -1825,41 +2454,79 @@ const AdminDashboard = () => {
                       <input
                         type="checkbox"
                         checked={fixedIsActive}
-                        onChange={(event) => setFixedIsActive(event.target.checked)}
+                        onChange={(event) =>
+                          setFixedIsActive(event.target.checked)
+                        }
                         className="h-4 w-4"
                       />
-                      {t("admin_expense_active","Gasto ativo")}
+                      {t("admin_expense_active", "Gasto ativo")}
                     </label>
-                    <Button type="submit" disabled={fixedSubmitting} className="md:w-fit">
-                      {fixedSubmitting ? t("admin_saving","Salvando...") : t("admin_register_fixed","Cadastrar gasto fixo")}
+                    <Button
+                      type="submit"
+                      disabled={fixedSubmitting}
+                      className="md:w-fit"
+                    >
+                      {fixedSubmitting
+                        ? t("admin_saving", "Salvando...")
+                        : t("admin_register_fixed", "Cadastrar gasto fixo")}
                     </Button>
                   </form>
 
                   {fixedError ? (
                     <div className="rounded-md border border-destructive/40 p-3">
-                      <p className="text-destructive font-semibold">{t("admin_error_load_fixed","Erro ao carregar gastos fixos")}</p>
-                      <p className="text-sm text-muted-foreground mt-1">{fixedError}</p>
-                      <Button variant="outline" className="mt-3" onClick={loadFixedExpenses}>
-                        {t("admin_retry","Tentar novamente")}
+                      <p className="text-destructive font-semibold">
+                        {t(
+                          "admin_error_load_fixed",
+                          "Erro ao carregar gastos fixos",
+                        )}
+                      </p>
+                      <p className="text-sm text-muted-foreground mt-1">
+                        {fixedError}
+                      </p>
+                      <Button
+                        variant="outline"
+                        className="mt-3"
+                        onClick={loadFixedExpenses}
+                      >
+                        {t("admin_retry", "Tentar novamente")}
                       </Button>
                     </div>
                   ) : fixedLoading ? (
-                    <p className="text-sm text-muted-foreground">{t("admin_loading","Carregando...")}</p>
+                    <p className="text-sm text-muted-foreground">
+                      {t("admin_loading", "Carregando...")}
+                    </p>
                   ) : fixedExpenses.length === 0 ? (
-                    <p className="text-sm text-muted-foreground">{t("admin_no_fixed","Nenhum gasto fixo cadastrado.")}</p>
+                    <p className="text-sm text-muted-foreground">
+                      {t("admin_no_fixed", "Nenhum gasto fixo cadastrado.")}
+                    </p>
                   ) : (
                     <div className="space-y-2">
                       {fixedExpenses.map((expense) => (
-                        <div key={expense.id} className="rounded-md border border-border/70 p-3 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2">
+                        <div
+                          key={expense.id}
+                          className="rounded-md border border-border/70 p-3 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2"
+                        >
                           <div>
                             <p className="font-medium">{expense.title}</p>
                             <p className="text-xs text-muted-foreground">
-                              {t("admin_start_prefix","Inicio")}: {formatDateBr(expense.startsOn)} · {t("admin_end_prefix","Fim")}: {formatDateBr(expense.endsOn)} · {expense.isActive ? t("admin_active","Ativo") : t("admin_inactive","Inativo")}
+                              {t("admin_start_prefix", "Inicio")}:{" "}
+                              {formatDateBr(expense.startsOn)} ·{" "}
+                              {t("admin_end_prefix", "Fim")}:{" "}
+                              {formatDateBr(expense.endsOn)} ·{" "}
+                              {expense.isActive
+                                ? t("admin_active", "Ativo")
+                                : t("admin_inactive", "Inativo")}
                             </p>
-                            {expense.notes && <p className="text-xs text-muted-foreground mt-1">{expense.notes}</p>}
+                            {expense.notes && (
+                              <p className="text-xs text-muted-foreground mt-1">
+                                {expense.notes}
+                              </p>
+                            )}
                           </div>
                           <div className="flex items-center gap-2 self-end sm:self-center">
-                            <p className="font-heading text-lg">{formatMoney(expense.amount)}</p>
+                            <p className="font-heading text-lg">
+                              {formatMoney(expense.amount)}
+                            </p>
                             <Button
                               variant="outline"
                               size="sm"
@@ -1867,7 +2534,7 @@ const AdminDashboard = () => {
                               disabled={fixedEditSaving}
                             >
                               <Pencil className="h-4 w-4 mr-1" />
-                              {t("admin_edit","Editar")}
+                              {t("admin_edit", "Editar")}
                             </Button>
                           </div>
                         </div>
@@ -1879,12 +2546,20 @@ const AdminDashboard = () => {
                 <section className="glass rounded-lg p-4 md:p-5">
                   <div className="flex items-center gap-2 mb-4">
                     <Wallet className="h-5 w-5 text-primary" />
-                    <h2 className="font-heading text-xl font-semibold">{t("admin_variable_title","Gastos variaveis")}</h2>
+                    <h2 className="font-heading text-xl font-semibold">
+                      {t("admin_variable_title", "Gastos variaveis")}
+                    </h2>
                   </div>
 
-                  <form onSubmit={handleCreateVariableExpense} className="grid grid-cols-1 md:grid-cols-2 gap-3 mb-5">
+                  <form
+                    onSubmit={handleCreateVariableExpense}
+                    className="grid grid-cols-1 md:grid-cols-2 gap-3 mb-5"
+                  >
                     <Input
-                      placeholder={t("admin_variable_title_placeholder","Titulo do gasto variavel")}
+                      placeholder={t(
+                        "admin_variable_title_placeholder",
+                        "Titulo do gasto variavel",
+                      )}
                       value={variableTitle}
                       onChange={(event) => setVariableTitle(event.target.value)}
                       required
@@ -1895,15 +2570,21 @@ const AdminDashboard = () => {
                       step="0.01"
                       placeholder="Valor"
                       value={variableAmount}
-                      onChange={(event) => setVariableAmount(event.target.value)}
+                      onChange={(event) =>
+                        setVariableAmount(event.target.value)
+                      }
                       required
                     />
                     <div>
-                      <label className="block text-xs text-muted-foreground mb-1">{t("admin_expense_date","Data da despesa")}</label>
+                      <label className="block text-xs text-muted-foreground mb-1">
+                        {t("admin_expense_date", "Data da despesa")}
+                      </label>
                       <Input
                         type="date"
                         value={variableExpenseDate}
-                        onChange={(event) => setVariableExpenseDate(event.target.value)}
+                        onChange={(event) =>
+                          setVariableExpenseDate(event.target.value)
+                        }
                         required
                       />
                     </div>
@@ -1911,47 +2592,87 @@ const AdminDashboard = () => {
                       <Textarea
                         placeholder="Observacoes (opcional)"
                         value={variableNotes}
-                        onChange={(event) => setVariableNotes(event.target.value)}
+                        onChange={(event) =>
+                          setVariableNotes(event.target.value)
+                        }
                         className="min-h-20"
                       />
                     </div>
-                    <Button type="submit" disabled={variableSubmitting} className="md:w-fit">
-                      {variableSubmitting ? t("admin_saving","Salvando...") : t("admin_register_variable","Cadastrar gasto variavel")}
+                    <Button
+                      type="submit"
+                      disabled={variableSubmitting}
+                      className="md:w-fit"
+                    >
+                      {variableSubmitting
+                        ? t("admin_saving", "Salvando...")
+                        : t(
+                            "admin_register_variable",
+                            "Cadastrar gasto variavel",
+                          )}
                     </Button>
                   </form>
 
                   <div className="mb-3 text-sm text-muted-foreground flex items-center gap-2">
                     <TrendingUp className="h-4 w-4" />
-                    {t("admin_variable_period","Gastos variaveis de")} {formatDateBr(appliedStartDate)} {t("admin_to","ate")} {formatDateBr(appliedEndDate)}
+                    {t("admin_variable_period", "Gastos variaveis de")}{" "}
+                    {formatDateBr(appliedStartDate)} {t("admin_to", "ate")}{" "}
+                    {formatDateBr(appliedEndDate)}
                   </div>
 
                   {variableError ? (
                     <div className="rounded-md border border-destructive/40 p-3">
-                      <p className="text-destructive font-semibold">{t("admin_error_load_variable","Erro ao carregar gastos variaveis")}</p>
-                      <p className="text-sm text-muted-foreground mt-1">{variableError}</p>
+                      <p className="text-destructive font-semibold">
+                        {t(
+                          "admin_error_load_variable",
+                          "Erro ao carregar gastos variaveis",
+                        )}
+                      </p>
+                      <p className="text-sm text-muted-foreground mt-1">
+                        {variableError}
+                      </p>
                       <Button
                         variant="outline"
                         className="mt-3"
-                        onClick={() => loadVariableExpenses(appliedStartDate, appliedEndDate)}
+                        onClick={() =>
+                          loadVariableExpenses(appliedStartDate, appliedEndDate)
+                        }
                       >
-                        {t("admin_retry","Tentar novamente")}
+                        {t("admin_retry", "Tentar novamente")}
                       </Button>
                     </div>
                   ) : variableLoading ? (
-                    <p className="text-sm text-muted-foreground">{t("admin_loading","Carregando...")}</p>
+                    <p className="text-sm text-muted-foreground">
+                      {t("admin_loading", "Carregando...")}
+                    </p>
                   ) : variableExpenses.length === 0 ? (
-                    <p className="text-sm text-muted-foreground">{t("admin_no_variable","Nenhum gasto variavel neste periodo.")}</p>
+                    <p className="text-sm text-muted-foreground">
+                      {t(
+                        "admin_no_variable",
+                        "Nenhum gasto variavel neste periodo.",
+                      )}
+                    </p>
                   ) : (
                     <div className="space-y-2">
                       {variableExpenses.map((expense) => (
-                        <div key={expense.id} className="rounded-md border border-border/70 p-3 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2">
+                        <div
+                          key={expense.id}
+                          className="rounded-md border border-border/70 p-3 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2"
+                        >
                           <div>
                             <p className="font-medium">{expense.title}</p>
-                            <p className="text-xs text-muted-foreground">Data: {formatDateBr(expense.expenseDate)}</p>
-                            {expense.notes && <p className="text-xs text-muted-foreground mt-1">{expense.notes}</p>}
+                            <p className="text-xs text-muted-foreground">
+                              Data: {formatDateBr(expense.expenseDate)}
+                            </p>
+                            {expense.notes && (
+                              <p className="text-xs text-muted-foreground mt-1">
+                                {expense.notes}
+                              </p>
+                            )}
                           </div>
                           <div className="flex items-center gap-2 self-end sm:self-center">
-                            <p className="font-heading text-lg">{formatMoney(expense.amount)}</p>
+                            <p className="font-heading text-lg">
+                              {formatMoney(expense.amount)}
+                            </p>
                             <Button
                               variant="outline"
                               size="sm"
@@ -1959,7 +2680,7 @@ const AdminDashboard = () => {
                               disabled={variableEditSaving}
                             >
                               <Pencil className="h-4 w-4 mr-1" />
-                              {t("admin_edit","Editar")}
+                              {t("admin_edit", "Editar")}
                             </Button>
                           </div>
                         </div>
