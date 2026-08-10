@@ -1,6 +1,6 @@
 import type { SubscriptionPlan } from "@/lib/api";
 
-const STORAGE_KEY = "chincoa_selected_subscription_plan";
+const STORAGE_KEY = "andretto_selected_subscription_plan";
 
 export function saveSelectedSubscriptionPlan(plan: SubscriptionPlan) {
   sessionStorage.setItem(STORAGE_KEY, JSON.stringify(plan));

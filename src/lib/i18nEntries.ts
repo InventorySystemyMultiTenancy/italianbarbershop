@@ -1,8 +1,8 @@
 import type { TranslationEntries } from "@/lib/i18n";
 
 export const UI_TRANSLATION_ENTRIES_IT: TranslationEntries = {
-  brand_name: "Nome del tuo barbiere",
-  brand_logo_alt: "Logo del tuo barbiere",
+  brand_name: "Andretto Barbearia",
+  brand_logo_alt: "Logo Andretto Barbearia",
   language_site: "Lingua del sito",
   language_active: "attivo",
   nav_book: "Prenota",
@@ -238,8 +238,8 @@ export const UI_TRANSLATION_ENTRIES_IT: TranslationEntries = {
 };
 
 export const UI_TRANSLATION_ENTRIES_PT: TranslationEntries = {
-  brand_name: "Nome da sua barbearia",
-  brand_logo_alt: "Logo da sua barbearia",
+  brand_name: "Andretto Barbearia",
+  brand_logo_alt: "Logo Andretto Barbearia",
   language_site: "Idioma do site",
   language_active: "ativo",
   nav_book: "Agendar",
@@ -475,8 +475,8 @@ export const UI_TRANSLATION_ENTRIES_PT: TranslationEntries = {
 };
 
 export const UI_TRANSLATION_ENTRIES_EN: TranslationEntries = {
-  brand_name: "Your Barbershop Name",
-  brand_logo_alt: "Your barbershop logo",
+  brand_name: "Andretto Barbershop",
+  brand_logo_alt: "Andretto Barbershop logo",
   language_site: "Site language",
   language_active: "active",
   nav_book: "Book",
@@ -712,8 +712,8 @@ export const UI_TRANSLATION_ENTRIES_EN: TranslationEntries = {
 };
 
 export const UI_TRANSLATION_ENTRIES_ES: TranslationEntries = {
-  brand_name: "Nombre de tu barbería",
-  brand_logo_alt: "Logo de tu barbería",
+  brand_name: "Andretto Barbería",
+  brand_logo_alt: "Logo Andretto Barbería",
   language_site: "Idioma del sitio",
   language_active: "activo",
   nav_book: "Reservar",

@@ -6,7 +6,8 @@ import { useAuth } from "@/contexts/AuthContext";
 import { useLanguage } from "@/contexts/LanguageContext";
 import Header from "@/components/Header";
 import heroImage from "@/assets/hero-barbershop.jpg";
-import logoImage from "@/assets/Chincoa Cort's logo.png";
+
+const logoImage = "/andretto-logo.png";
 
 function isBirthdayToday(dateText?: string) {
   if (!dateText) return false;

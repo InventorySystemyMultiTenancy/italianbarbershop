@@ -7,7 +7,7 @@ import {
   type SubscriptionInfo,
 } from "@/lib/api";
 
-const STORAGE_KEY = "chincoa_subscription_reference";
+const STORAGE_KEY = "andretto_subscription_reference";
 
 export type StoredSubscriptionReference = {
   id?: string;

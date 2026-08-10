@@ -3,7 +3,8 @@ import { useAuth } from "@/contexts/AuthContext";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { Button } from "@/components/ui/button";
 import { Calendar, Languages, LogOut, Shield } from "lucide-react";
-import logoImage from "@/assets/Chincoa Cort's logo.png";
+
+const logoImage = "/andretto-logo.png";
 
 const Header = () => {
   const { user, isAdmin, signOut } = useAuth();
